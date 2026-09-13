@@ -1,78 +1,325 @@
-import importlib.util
-import subprocess
-import sys
-for package in ['pyautogui','pyperclip','selenium','pygetwindow']:
-    if importlib.util.find_spec(package) is None:
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', package])
-import pyautogui
-import pygetwindow
-import pyperclip
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-import time
-catNames=[]
-catLinks=[]
-run=False
-while not run:
-    cats=int(input('How many tests? '))
-    speed=str((cats*6)//60)+' minutes and '+str(cats*6-((cats*6)//60)*60)+ ' seconds'
-    run='y' in input(f'This will take a minimum of {speed}. Proceed? ').strip().lower()
-options=Options()
-options.add_argument('--headless=new')
-driver=webdriver.Chrome(options=options)
-pyautogui.hotkey('win','r')
-pyautogui.typewrite('chrome')
-pyautogui.press('enter')
-while not any('Chrome' in window for window in pygetwindow.getAllTitles()):
-    time.sleep(0.1)
-chrome_window = None
-while not chrome_window:
-    for w in pygetwindow.getAllWindows():
-        if 'Chrome' in w.title:
-            chrome_window = w
-            break
-    time.sleep(0.1)
-chrome_window.activate()
-pyautogui.press('tab')
-pyautogui.press('enter')
-shopFails=0
-while len(catNames)<cats:
-    link='https://tabbycats.club/shop'
-    pyautogui.hotkey('ctrl','t')
-    time.sleep(1)
-    pyautogui.click(1880,160)
-    while link=='https://tabbycats.club/shop':  
-        time.sleep(0.5)
-        pyautogui.hotkey('tab')
-        pyautogui.hotkey('enter')
-        time.sleep(1)
-        pyautogui.hotkey('ctrl','l')
-        pyautogui.hotkey('ctrl','c')
-        link=pyperclip.paste()
-        pyautogui.hotkey('ctrl','w')
-    driver.get(link)
-    try:
-        catNameList=driver.find_element(By.CLASS_NAME,'pet-name').text.strip().split()
-    except:
-        catNameList=['Shop','Fail']
-        shopFails+=1
-    catName=' '.join(name.capitalize() for name in catNameList)
-    if not catName=='Shop Fail':
-        catNames.append(catName)
-        catLinks.append(link)
-    pyautogui.hotkey('ctrl','w')
-driver.quit()
-pyautogui.hotkey('alt','tab')
-legends=['Fiery', 'Evil', 'Pinky', 'Space', 'Night', 'Rainbow', 'Tiny']
-legendcats=[]
-legendlinks=[]
-for x in range(cats):
-    print(f'Cat {x+1}: \n └> Name: {catNames[x]}. \n └> Link: {catLinks[x]}.')
-    if any(name in catNames[x] for name in legends) and 'Nightmare' not in catNames[x]:
-        legendcats.append(catNames[x])
-        legendlinks.append(catLinks[x])
-for x in range(len(legendcats)):
-    print(f'Legendary Cat {x+1}: \n └> Name: {legendcats[x]}. \n └> Link: {legendlinks[x]}.')
-shopFailPercent=round(shopFails/((cats+shopFails))*100, 2)
-print(f'It failed and went to shop instead {shopFails} times, or {shopFailPercent}% of the time.')
+import json
+import urllib.request
+
+
+# ============================================================
+# TABBY CATS CONFIGURATION
+# ============================================================
+
+
+# ------------------------------------------------------------
+# PET TYPE
+# ------------------------------------------------------------
+#
+# The normal Tabby Cat:
+#
+#   PET_SKU       = "cat_tabbycat"
+#   PET_TYPE      = "cat"
+#   PET_TYPE_NAME = "Cat"
+#
+# Other animals can be configured here once their exact
+# petType values are known.
+# ------------------------------------------------------------
+
+PET_SKU = "cat_tabbycat"
+PET_TYPE = "cat"
+PET_TYPE_NAME = "Cat"
+
+
+# ------------------------------------------------------------
+# NAME
+# ------------------------------------------------------------
+
+# First name.
+FIRST_NAME = "Rainbow"
+
+# Last name.
+LAST_NAME = "Cat"
+
+
+# ------------------------------------------------------------
+# SPECIAL / LEGENDARY
+# ------------------------------------------------------------
+#
+# This is NOT automatically determined by the name when we
+# construct the snapshot manually.
+#
+# The site uses this value as a CSS class on the background.
+#
+# Known special values:
+#
+#   "Casper"
+#   "Night"
+#   "Pinky"
+#   "Evil"
+#   "Rainbow"
+#   "Space"
+#   "Tiny"
+#   "Lil-404"
+#
+# Use None for a normal pet.
+#
+# Note:
+# The name does not have to match the special value. For
+# example, you can technically have:
+#
+#   FIRST_NAME = "Plasmadmin"
+#   LAST_NAME = "Cat"
+#   SPECIAL = "Rainbow"
+#
+# and the resulting snapshot will have Rainbow's special
+# appearance while still being named Plasmadmin Cat.
+# ------------------------------------------------------------
+
+SPECIAL = "Rainbow"
+
+
+# ------------------------------------------------------------
+# COLOR
+# ------------------------------------------------------------
+#
+# Known normal cat colors:
+#
+#   "orange"
+#   "white"
+#   "gray"
+#   "black"
+#   "brown"
+#
+# Other animals may have different valid colors.
+# ------------------------------------------------------------
+
+COLOR = "black"
+
+
+# ------------------------------------------------------------
+# BODY
+# ------------------------------------------------------------
+#
+# Normal Tabby Cat values generated by the current game:
+#
+#   0
+#   1
+#   2
+#   3
+#   4
+#   5
+#
+# Other animals may use different ranges.
+# ------------------------------------------------------------
+
+BODY = 0
+
+
+# ------------------------------------------------------------
+# HEAD
+# ------------------------------------------------------------
+#
+# Normal Tabby Cat values generated by the current game:
+#
+#   0
+#   1
+#
+# Other animals may use different values.
+# ------------------------------------------------------------
+
+HEAD = 0
+
+
+# ------------------------------------------------------------
+# LIKES PETS
+# ------------------------------------------------------------
+#
+# Valid values:
+#
+#   "likes"
+#   "hates"
+# ------------------------------------------------------------
+
+LIKES_PETS = "likes"
+
+
+# ------------------------------------------------------------
+# BACKGROUND COLOR
+# ------------------------------------------------------------
+#
+# Known background colors:
+#
+#   "light-blue"
+#   "red"
+#   "blue"
+#   "light-purple"
+#   "purple"
+#   "green"
+#   "teal"
+#   "yellow"
+#   "mauve"
+# ------------------------------------------------------------
+
+BG_COLOR = "light-blue"
+
+
+# ------------------------------------------------------------
+# TOY
+# ------------------------------------------------------------
+#
+# Use None for no toy.
+#
+# Known toy IDs:
+#
+#   "toy-Yarn"
+#   "toy-Mouse"
+#   "toy-Pizza"
+#   "toy-Fishbones"
+#   "toy-SoccerBall"
+#   "toy-Donut"
+#   "toy-Fishbowl"
+#   "toy-Campfire"
+#   "toy-MagicWand"
+#   "toy-IceCream"
+#   "toy-Coffee"
+#   "toy-MiniGolf"
+#   "toy-Flamingo"
+#   "toy-Rocketship"
+#   "toy-FoamFinger"
+#   "toy-BonsaiTree"
+#   "toy-Wine"
+#   "toy-Synth"
+#   "toy-Martini"
+# ------------------------------------------------------------
+
+TOY = None
+
+
+# ------------------------------------------------------------
+# GLASSES
+# ------------------------------------------------------------
+#
+# Use None for no glasses.
+#
+# Known glasses IDs:
+#
+#   "glasses-Raybans"
+#   "glasses-CatEye"
+#   "glasses-ThreeD"
+#   "glasses-OldMan"
+#   "glasses-Scuba"
+#   "glasses-Kerry"
+#   "glasses-Blue"
+#   "glasses-Sunglasses"
+# ------------------------------------------------------------
+
+GLASSES = None
+
+
+# ------------------------------------------------------------
+# HAT
+# ------------------------------------------------------------
+#
+# Use None for no hat.
+#
+# Known hat IDs:
+#
+#   "hat-PartyHat"
+#   "hat-Fedora"
+#   "hat-Fez"
+#   "hat-Chef"
+#   "hat-Baseball"
+#   "hat-Beanie"
+#   "hat-Princess"
+#   "hat-King"
+#   "hat-Unicorn"
+#   "hat-Sweatband"
+#   "hat-Spinner"
+#   "hat-Bow"
+# ------------------------------------------------------------
+
+HAT = None
+
+
+# ------------------------------------------------------------
+# KITTEN
+# ------------------------------------------------------------
+#
+# Use None for no kitten.
+#
+# Known values:
+#
+#   "Frisky"
+#   "Scuba"
+#   "Unicorn"
+#   "Camper"
+#   "Rocketship"
+#   "Fan"
+#   "Bonsai"
+#   "Midi"
+#   "Athlete"
+#   "Coffee"
+#   "Chef"
+#   "Birthday"
+#
+# These normally result from particular toy/hat/glasses
+# combinations.
+# ------------------------------------------------------------
+
+KITTEN = None
+
+
+# ============================================================
+# BUILD SNAPSHOT DATA
+# ============================================================
+
+payload = {
+    "petType": {
+        "sku": PET_SKU,
+        "type": PET_TYPE,
+        "name": PET_TYPE_NAME,
+    },
+
+    "name": {
+        "first": FIRST_NAME,
+        "last": LAST_NAME,
+        "full": f"{FIRST_NAME} {LAST_NAME}",
+        "special": SPECIAL,
+    },
+
+    "color": COLOR,
+    "likesPets": LIKES_PETS,
+    "body": BODY,
+    "head": HEAD,
+    "bgColor": BG_COLOR,
+
+    "kitten": KITTEN,
+    "hat": HAT,
+    "glasses": GLASSES,
+    "toy": TOY,
+}
+
+
+# ============================================================
+# SEND TO SERVER
+# ============================================================
+
+data = json.dumps(payload).encode("utf-8")
+
+request = urllib.request.Request(
+    "https://tabbycats.club/save",
+    data=data,
+    headers={
+        "Content-Type": "application/json",
+    },
+    method="POST",
+)
+
+
+with urllib.request.urlopen(request) as response:
+    snapshot_id = response.read().decode("utf-8").strip()
+
+
+# ============================================================
+# PRINT PERMALINK
+# ============================================================
+
+permalink = f"https://tabbycats.club/cat/{snapshot_id}"
+
+print(permalink)

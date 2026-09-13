@@ -25,15 +25,6 @@
     cityscape.appendChild(layer0);
     cityscape.appendChild(layer1);
     cityscape.appendChild(layer2);
-    function randint(min,max){
-      return Math.floor(Math.random()*(max-min+1))+min;
-    }
-    function randrange(max){
-      return Math.floor(Math.random()*max);
-    }
-    function choice(array){
-      return array[Math.floor(Math.random()*array.length)];
-    }
     function svgElement(type,attributes){
       const element=document.createElementNS(svgNS,type);
       for(const[key,value]of Object.entries(attributes)){
@@ -45,24 +36,24 @@
       let x=0;
       const y=height;
       while(x<width){
-        const h=randint(min_height,max_height);
-        const w=randint(1,Math.floor(width/10));
+        const h=Math.floor(Math.random()*(max_height-min_height+1))+min_height;
+        const w=Math.floor(Math.random()*(Math.floor(width/10)-1))+1;
         canvas.appendChild(svgElement("rect",{x: x,y: y - h,width: w,height: h,fill: building_color}));
-        const wincnty=randint(0,Math.floor(h/5))+1;
-        const wincntx=randint(0,Math.floor(w/5))+1;
+        const wincnty=Math.floor(Math.random()*(Math.floor(h/5)-1))+1;
+        const wincntx=Math.floor(Math.random()*(Math.floor(w/5)-1))+1;
         const winwidth=Math.floor(w/wincntx);
         const winheight=Math.floor(h/wincnty);
         for(let j=0;j<wincnty-1;j++){
           for(let k=0;k<wincntx-1;k++){
             const hexDigits="0123456789abcdefABCDEF";
-            const h1=choice(hexDigits.split(""));
-            const h2=choice(hexDigits.split(""));
+            const h1=hexDigits[Math.floor(Math.random()*hexDigits.length)];
+            const h2=hexDigits[Math.floor(Math.random()*hexDigits.length)];
             const winColor="#"+(h1+h2)+(h1+h2)+"00";
             canvas.appendChild(svgElement("rect",{x:x +k * winwidth +Math.floor(winwidth / 4),y:y -h +j * winheight +Math.floor(winheight / 4),width:Math.floor(winwidth / 2),height:Math.floor(winheight / 2),fill: winColor}));
           }
         }
         if(Math.random()<1/5){
-          const antennaHeight=randint(5, 20);
+          const antennaHeight=Math.floor(Math.random()*(20-5+1))+5;
           canvas.appendChild(svgElement("line",{x1:x +Math.floor(w / 2),y1:y - h,x2:x +Math.floor(w / 2),y2:y -h -antennaHeight,stroke:building_color,"stroke-width": 1}));
         }
         x+=w;
@@ -81,8 +72,8 @@
       for(let i=0;i<30;i++){
         const count=Math.floor(i*HEIGHT/30);
         for(let j=0;j<count;j++){
-          const x=randrange(WIDTH);
-          const size=choice([0,0,0,0,1,2]);
+          const x=Math.floor(Math.random()*WIDTH);
+          const size=[0,0,0,0,1,2][Math.floor(Math.random()*[0,0,0,0,1,2].length)];
           skyLayer.appendChild(svgElement("circle",{cx: x,cy: y,r: size,fill: "#ffffff"}));
           y--;
         }
