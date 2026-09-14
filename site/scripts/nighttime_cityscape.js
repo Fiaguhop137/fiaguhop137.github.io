@@ -1,0 +1,173 @@
+let WIDTH=window.innerWidth;
+let HEIGHT=window.innerHeight;
+const cityscape=document.getElementById("cityscape");
+cityscape.setAttribute("viewBox",`0 0 ${WIDTH} ${HEIGHT}`);
+const svgNS="http://www.w3.org/2000/svg";
+const skyLayer=document.createElementNS(svgNS,"g");
+skyLayer.setAttribute("id","sky-layer");
+const moonLayer=document.createElementNS(svgNS,"g");
+moonLayer.setAttribute("id","moon-layer");
+const layer0=document.createElementNS(svgNS,"g");
+layer0.setAttribute("id","layer-0");
+const layer1=document.createElementNS(svgNS,"g");
+layer1.setAttribute("id","layer-1");
+const layer2=document.createElementNS(svgNS,"g");
+layer2.setAttribute("id","layer-2");
+cityscape.appendChild(skyLayer);
+cityscape.appendChild(moonLayer);
+cityscape.appendChild(layer0);
+cityscape.appendChild(layer1);
+cityscape.appendChild(layer2);
+function svgElement(type,attributes){
+    const element=document.createElementNS(svgNS,type);
+    for (const [key,value] of Object.entries(attributes)){
+        element.setAttribute(key,value);
+    }
+    return element;
+}
+function buildings(canvas,width,height,min_height,max_height,building_color){
+    let x=0;
+    const y=height;
+    while (x < width){
+        const h=Math.floor(Math.random()*(max_height-min_height+1))+min_height;
+        const w=Math.floor(Math.random()*(Math.floor(width/10)-1))+1;
+        canvas.appendChild(
+            svgElement(
+                "rect",{
+                    x: x,
+                    y: y-h,
+                    width: w,
+                    height: h,
+                    fill: building_color    
+                }
+            )
+        );
+        const wincnty=Math.floor(Math.random()*(Math.floor(h/5)-1))+1;
+        const wincntx=Math.floor(Math.random()*(Math.floor(w/5)-1))+1;
+        const winwidth=Math.floor(w/wincntx);
+        const winheight=Math.floor(h/wincnty);
+        for (let j=0; j < wincnty-1; j++){
+            for (let k=0;k<wincntx-1;k++){
+                const hexDigits="0123456789abcdefABCDEF";
+                const h1=  hexDigits[Math.floor(Math.random()*hexDigits.length)];
+                const h2=  hexDigits[Math.floor(Math.random()*hexDigits.length)];
+                const winColor="#"+(h1+h2)+(h1+h2)+"00";
+                canvas.appendChild(
+                    svgElement(
+                        "rect",{
+                            x: x+k*winwidth+Math.floor(winwidth/4),
+                            y: y-h+j*winheight+Math.floor(winheight/4),
+                            width: Math.floor(winwidth/2),
+                            height: Math.floor(winheight/2),
+                            fill: winColor
+                        }
+                    )
+                );
+            }
+        }
+        if(Math.random()<1/5){
+            const antennaHeight=Math.floor(Math.random()*(20-5+1))+5;
+            canvas.appendChild(
+                svgElement(
+                    "line",{
+                        x1: x+Math.floor(w/2),
+                        y1: y-h,
+                        x2: x+Math.floor(w/2),
+                        y2: y-h-antennaHeight,
+                        stroke: building_color,
+                        "stroke-width": 1
+                    }
+                )
+            );
+        }
+        x+=w;
+        }
+    }
+function makeCity(){
+    WIDTH=window.innerWidth;
+    HEIGHT=window.innerHeight;
+    cityscape.setAttribute("viewBox",`0 0 ${WIDTH} ${HEIGHT}`);
+    skyLayer.innerHTML="";
+    moonLayer.innerHTML="";
+    layer0.innerHTML="";
+    layer1.innerHTML="";
+    layer2.innerHTML="";
+    let y=HEIGHT;
+    for (let i=0; i < 30; i++){
+        const count=Math.floor(i*HEIGHT/30);
+        for (let j=0; j < count; j++){
+            const x=Math.floor(Math.random()*WIDTH);
+            const size=[0,0,0,0,1,2][
+                Math.floor(Math.random()*6)
+            ];
+            skyLayer.appendChild(
+                svgElement("circle",{
+                cx: x,
+                cy: y,
+                r: size,
+                fill: "#ffffff"
+                })
+            );
+            y--;
+        }
+        y=HEIGHT;
+    }
+    moonLayer.appendChild(
+    svgElement("circle",{
+        cx: Math.floor(WIDTH/6),
+        cy: Math.floor(HEIGHT/6),
+        r: Math.floor(WIDTH/12),
+        fill: "#bbddff"
+    })
+    );
+    moonLayer.appendChild(
+    svgElement("circle",{
+        cx: Math.floor(WIDTH/8)+Math.floor(WIDTH/12),
+        cy: Math.floor(HEIGHT/8),
+        r: Math.floor(WIDTH/16),
+        fill: "#050e39"
+    })
+    );
+    const min_building_heights=[
+        Math.floor(HEIGHT/5),
+        Math.floor(HEIGHT/4),
+        Math.floor(HEIGHT/3)
+    ];
+    buildings(
+        layer0,
+        WIDTH,
+        HEIGHT,
+        min_building_heights[0],
+        HEIGHT-min_building_heights[0],
+        "#000000"
+    );
+    buildings(
+        layer1,
+        WIDTH,
+        HEIGHT,
+        min_building_heights[1],
+        HEIGHT-min_building_heights[1],
+        "#111111"
+    );
+    buildings(
+        layer2,
+        WIDTH,
+        HEIGHT,
+        min_building_heights[2],
+        HEIGHT-min_building_heights[2],
+        "#222222"
+    );
+}
+cityscape.addEventListener("keydown",function(event){
+if(event.code==="Space"){
+event.preventDefault();
+makeCity();
+}
+});
+cityscape.addEventListener("click",function(){
+makeCity();
+});
+window.addEventListener("resize",function(){
+makeCity();
+});
+makeCity();
