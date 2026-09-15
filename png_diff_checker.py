@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import sys
 from PIL import Image,ImageOps
 if len(sys.argv)!=4:
@@ -6,6 +5,8 @@ if len(sys.argv)!=4:
     sys.exit(1)
 image_1=Image.open(sys.argv[1]).convert("RGBA")
 image_2=Image.open(sys.argv[2]).convert("RGBA")
+image_1:Image.Image
+image_2:Image.Image
 output_path=sys.argv[3]
 area_1=image_1.width*image_1.height
 area_2=image_2.width*image_2.height
@@ -16,6 +17,7 @@ else:
     smaller=image_2
     larger=image_1
 inverted=ImageOps.invert(smaller.convert("RGB")).convert("RGBA")
+inverted:Image.Image
 alpha=inverted.getchannel("A")
 alpha=alpha.point(lambda a:a//2)
 inverted.putalpha(alpha)

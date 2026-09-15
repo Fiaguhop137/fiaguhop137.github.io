@@ -1,13 +1,5 @@
-import importlib.util
-import subprocess
 import random
 import time
-import sys
-for package in ['pyautogui','pygetwindow']:
-    if importlib.util.find_spec(package) is None:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", package])
-import pygetwindow
-import pyautogui
 def chapterRun(chapter):
     if chapter==0:
         global name
@@ -121,23 +113,6 @@ chapterTitles=['The beginning','The meadow']
 def lose():
     print("Bye!")
     time.sleep(1)
-    pyautogui.FAILSAFE=False
-    pythonRunner=pygetwindow.getActiveWindow()
-    restorationAttempted=False
-    while True:
-        if restorationAttempted:
-            dangerMode=False
-            if dangerMode:
-                pyautogui.hotkey('alt', 'tab')
-                pyautogui.hotkey('alt', 'f4')
-            else:
-                print("Gotcha.")
-                time.sleep(1)
-                pyautogui.hotkey('alt', 'f4')
-        else:
-            if not pythonRunner.isMinimized:
-                pythonRunner.minimize()
-                restorationAttempted=True
 door=input(f"\n\n\nWelcome to my game! Please use proper spelling or you will die. (Or I guess your computer will die but same difference) \n\nYou enter a room. It is empty of all furniture, and the walls are stark white. There are two doors, marked: \n Life. \n Death. \n A sign reads: \nChoose neither. \nTurn back. \n\nNow. \nWhat would you like to do? \n").strip().lower()
 if door!="life": 
     if "turn back" in door or "neither" in door:
