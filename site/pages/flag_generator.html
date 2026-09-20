@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <iframe src="../pages/header.html" width="100%" height="30" style="border: none;"></iframe> 
+    <title>Fiaguhop137's Pride Flag Generator</title>
+    <style>
+        body{font-family:monospace,courier;background:#221111;color:#ffeeee;padding:15px;max-width:900px;margin:0 auto;font-size:15px;}
+        .container{display:flex;flex-direction:column;gap:15px;}
+        input,button{background:#332222;border:1px solid #554444;color:#ffeeee;padding:9px;font-family:monospace,courier;font-size: 15px;}
+        input:focus{outline:none;border-color:#998888;}
+        .output-box{margin-top:15px;border:1px dashed #554444;padding:15px;display:flex;justify-content:center;align-items:center;background:#332222;min-height:300px;}
+        svg{max-width:100%;max-height:500px;height:auto;}
+        .title{color:#ffeeee;font-size:24px;}
+        .info{color:#ffeeee;font-size:12px;}
+    </style>
+</head>
+<body>
+    <p class="title">Flag Generator</p>
+    <p class="info">Enter your code below. Supports standard horizontal flags, chevron flags using >, and circular split flags using o.</p>
+    <script src="../scripts/flag_generator.js"></script>
+    <div class="container">
+        <label for="code">Paste or type your code:</label>
+        <input type="text" id="code" placeholder="e.g. ff000000ff000000ff" oninput="draw()">
+        <label for="flagName">Flag Name (for download):</label>
+        <input type="text" id="flagName" placeholder="the name of your flag">
+        <label for="userName">Your Name (for metadata):</label>
+        <input type="text" id="userName" placeholder="the name you'd like to appear in the metadata">
+        <button onclick="download()">Download</button>
+        <div class="output-box" id="flagContainer"></div>
+    </div>
+</body>
+</html>
