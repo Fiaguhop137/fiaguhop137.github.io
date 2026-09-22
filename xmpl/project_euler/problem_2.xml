@@ -1,0 +1,50 @@
+<import namespace="io"/>
+<import namespace="math"/>
+<let mut=true type="int" name="x">0</let>
+<let mut=true type="int" name="y">1</let>
+<let mut=true type="int" name="z">1</let>
+<let mut=true type="int" name="sum">0</let>
+<while>
+    <condition>
+        <less_than namespace="math">
+            <get name="z"/>
+            <int>4000000</int>
+        </less_than>
+    </condition>
+    <do>
+        <if>
+            <condition>
+                <equal>
+                    <mod namespace="math">
+                        <get name="z"/>
+                        <int>2</int>
+                    </mod>
+                    <int>0</int>
+                </equal>
+            </condition>
+            <then>
+                <set name="sum">
+                    <add namespace="math">
+                        <get name="sum"/>
+                        <get name="z"/>
+                    </add>
+                </set>
+            </then>
+        </if>
+        <set name="z">
+            <add namespace="math">
+                <get name="x"/>
+                <get name="y"/>
+            </add>
+        </set>
+        <set name="x">
+            <get name="y"/>
+        </set>
+        <set name="y">
+            <get name="z"/>
+        </set>
+    </do>
+</while>
+<print namespace="io">
+    <get name="sum"/>
+</print>

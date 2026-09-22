@@ -2,9 +2,11 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <iframe src="../pages/header.html" style="width:100%;height:30px;overflow:hidden;border:none"></iframe>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>XMPL: eXtensible Markup Programming Language</title>
-        <link rel="stylesheet" href="style.css">
+        <style> iframe{display:block;border:none;}</style>
+        <link rel="stylesheet" href="../stylesheets/xmpl.css">
     </head>
     <body>
         <h1>XMPL: eXtensible Markup Programming Language</h1>
@@ -77,5 +79,10 @@
         <p>XMPL has a built-in import system that allows you to import functions from other files</p>
         <p><code>&lt;import&gt;</code> takes a <code>&lt;namespace&gt;</code> attribute to specify the namespace of the imported functions</p>
         <p>Once imported, functions can be called using their element name with the <code>namespace</code> attribute</p>
+        <h2>Examples and Standard Libraries</h2>
+        <p>XMPL comes with a standard library of functions that can be imported and used in your code</p>
+        <p>For example, the math library provides functions for basic arithmetic operations, as well as more advanced mathematical functions</p>
+        <p>There are also example programs provided in the <code>xmpl</code> directory that demonstrate how to use the language and its standard libraries.</p>
+        <p>These examples can serve as a starting point for creating your own programs in XMPL.</p>
     </body>
 </html>
