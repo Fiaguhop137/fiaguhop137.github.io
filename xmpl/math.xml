@@ -1,0 +1,217 @@
+<namespace>
+    <name>math</name>
+    <define>
+        <name>add</name>
+        <arguments>
+            <argument mut=false type="int" name="a"><gument>
+            <argument mut=false type="int" name="b"><gument>
+        </arguments>
+        <body>
+            <return>
+                <subtract>
+                    <get name="a"/>
+                    <subtract>
+                        <int>0</int>
+                        <get name="b"/>
+                    </subtract>
+                </subtract>
+            </return>
+        </body>
+    </define>
+    <define>
+        <name>less_than</name>
+        <arguments>
+            <argument mut=false type="int" name="a"><gument>
+            <argument mut=false type="int" name="b"><gument>
+        </arguments>
+        <body>
+            <let mut=true type="int" name="a2"><get name="a"/></let>
+            <let mut=true type="int" name="b2"><get name="b"/></let>
+            <if>
+                <condition>
+                    <equal>
+                        <get name="a"/>
+                        <get name="b"/>
+                    </equal>
+                </condition>
+                <then>
+                    <return>
+                        <boolean>false</boolean>
+                    </return>
+                </then>
+            </if>
+            <while>
+                <condition>
+                    <boolean>true</boolean>
+                </condition>
+                <do>
+                    <set name="a2">
+                        <subtract>
+                            <get name="a2"/>
+                            <int>1</int>
+                        </subtract>
+                    </set>
+                    <set name="b2">
+                        <subtract>
+                            <get name="b2"/>
+                            <int>1</int>
+                        </subtract>
+                    </set>
+                    <if>
+                        <condition>
+                            <equal>
+                                <get name="a2"/>
+                                <get name="b"/>
+                            </equal>
+                        </condition>
+                        <then>
+                            <return>
+                                <boolean>false</boolean>
+                            </return>
+                        </then>
+                    </if>
+                    <if>
+                        <condition>
+                            <equal>
+                                <get name="b2"/>
+                                <get name="a"/>
+                            </equal>
+                        </condition>
+                        <then>
+                            <return>
+                                <boolean>true</boolean>
+                            </return>
+                        </then>
+                    </if>
+                </do>
+            </while>
+        </body>
+    </define>
+    <define>
+        <name>greater_than</name>
+        <arguments>
+            <argument mut=false type="int" name="a"></argument>
+            <argument mut=false type="int" name="b"></argument>
+        </arguments>
+        <body>
+            <let mut=true type="int" name="a2"><get name="a"/></let>
+            <let mut=true type="int" name="b2"><get name="b"/></let>
+            <if>
+                <condition>
+                    <equal>
+                        <get name="a"/>
+                        <get name="b"/>
+                    </equal>
+                </condition>
+                <then>
+                    <return>
+                        <boolean>false</boolean>
+                    </return>
+                </then>
+            </if>
+            <while>
+                <condition>
+                    <boolean>true</boolean>
+                </condition>
+                <do>
+                    <set name="a2">
+                        <add namespace="math">
+                            <get name="a2"/>
+                            <int>1</int>
+                        </add>
+                    </set>
+                    <set name="b2">
+                        <add namespace="math">
+                            <get name="b2"/>
+                            <int>1</int>
+                        </add>
+                    </set>
+                    <if>
+                        <condition>
+                            <equal>
+                                <get name="a2"/>
+                                <get name="b"/>
+                            </equal>
+                        </condition>
+                        <then>
+                            <return>
+                                <boolean>false</boolean>
+                            </return>
+                        </then>
+                    </if>
+                    <if>
+                        <condition>
+                            <equal>
+                                <get name="b2"/>
+                                <get name="a"/>
+                            </equal>
+                        </condition>
+                        <then>
+                            <return>
+                                <boolean>true</boolean>
+                            </return>
+                        </then>
+                    </if>
+                </do>
+            </while>
+        </body>
+    </define>
+    <define>
+        <name>multiply</name>
+        <arguments>
+            <argument mut=true type="int" name="a"></argument>
+            <argument mut=true type="int" name="b"></argument>
+        </arguments>
+        <body>
+            <if>
+                <condition>
+                    <less_than namespace="math">
+                        <get name="b"/>
+                        <int>0</int>
+                    </less_than>
+                </condition>
+                <then>
+                    <set name="a">
+                        <subtract>
+                            <int>0</int>
+                            <get name="a"/>
+                        </subtract>
+                    </set>
+                    <set name="b">
+                        <subtract>
+                            <int>0</int>
+                            <get name="b"/>
+                        </subtract>
+                    </set>
+                </then>
+            </if>
+            <let mut=true type="int" name="result">0</let>
+            <let mut=true type="int" name="i">0</let>
+            <while>
+                <condition>
+                    <less_than namespace="math">
+                        <get name="i"/>
+                        <get name="b"/>
+                    </less_than>
+                </condition>
+                <do>
+                    <set name="i">
+                        <add namespace="math">
+                            <get name="i"/>
+                            <int>1</int>
+                        </add>
+                    </set>
+                    <set name="result">
+                        <add namespace="math">
+                            <get name="result"/>
+                            <get name="a"/>
+                        </add>
+                    </set>
+                </do>
+            </while>
+            <return>
+                <get name="result"/>
+            </return>
+        </body>
+    </define>
+</namespace>

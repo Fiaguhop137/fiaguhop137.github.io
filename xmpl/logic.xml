@@ -1,0 +1,112 @@
+<namespace>
+    <name>logic</name>
+    <define>
+        <name>for</name>
+        <arguments>
+            <argument mut=false type="code" name="iterator"></argument>
+            <argument mut=false type="code" name="iteration"></argument>
+            <argument mut=false type="code" name="iterate"></argument>
+            <argument mut=false type="code" name="do"></argument>
+        </arguments>
+        <body>
+            <exec>
+                <get name="iterator"/>
+            </exec>
+            <while>
+                <exec>
+                    <get name="iteration"/>
+                </exec>
+                <do>
+                    <exec>
+                        <get name="do"/>
+                    </exec>
+                    <exec>
+                        <get name="iterate"/>
+                    </exec>
+                </do>
+            </while>
+        </body>
+    </define>
+    <define>
+        <name>or</name>
+        <arguments>
+            <argument mut=false type="boolean" name="a"></argument>
+            <argument mut=false type="boolean" name="b"></argument>
+        </arguments>
+        <body>
+            <if>
+                <condition>
+                    <get name="a"/>
+                </condition>
+                <then>
+                    <return>
+                        <boolean>true</boolean>
+                    </return>
+                </then>
+            </if>
+            <if>
+                <condition>
+                    <get name="b"/>
+                </condition>
+                <then>
+                    <return>
+                        <boolean>true</boolean>
+                    </return>
+                </then>
+            </if>
+            <return>
+                <boolean>false</boolean>
+            </return>
+        </body>
+    </define>
+    <define>
+        <name>and</name>
+        <arguments>
+            <argument mut=false type="boolean" name="a"></argument>
+            <argument mut=false type="boolean" name="b"></argument>
+        </arguments>
+        <body>
+            <if>
+                <condition>
+                    <get name="a"/>
+                </condition>
+                <then>
+                    <if>
+                        <condition>
+                            <get name="b"/>
+                        </condition>
+                        <then>
+                            <return>
+                                <boolean>true</boolean>
+                            </return>
+                        </then>
+                    </if>
+                </then>
+            </if>
+            <return>
+                <boolean>false</boolean>
+            </return>
+        </body>
+    </define>
+    <define>
+        <name>not</name>
+        <arguments>
+            <argument mut=false type="boolean" name="a"></argument>
+        </arguments>
+        <body>
+            <if>
+                <condition>
+                    <get name="a"/>
+                </condition>
+                <then>
+                    <return>
+                        <boolean>false</boolean>
+                    </return>
+                </then>
+            </if>
+            <return>
+                <boolean>true</boolean>
+            </return>
+        </body>
+    </define>
+</namespace>

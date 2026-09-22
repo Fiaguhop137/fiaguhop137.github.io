@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>XMPL: eXtensible Markup Programming Language</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <h1>XMPL: eXtensible Markup Programming Language</h1>
+        <p>Welcome to the eXtensible Markup Programming Language!</p>
+        <h2>Language Primitives</h2>
+        <h3>Logic</h3>
+        <h4><code>&lt;if&gt;</code></h4>
+        <p>Conditionally execute code based on a boolean expression held in <code>&lt;condition&gt;</code></p>
+        <p><code>&lt;if&gt;</code> takes a boolean expression and executes the code within its <code>&lt;then&gt;</code> block if the expression is true</p>
+        <p><code>&lt;condition&gt;</code> is the boolean expression that determines whether the code within the <code>&lt;if&gt;</code> block is executed</p>
+        <p>It can also have an <code>&lt;else&gt;</code> clause to execute code when the expression is false</p>
+        <h4><code>&lt;while&gt;</code></h4>
+        <p>Repeatedly execute code while a boolean expression is true</p>
+        <p><code>&lt;while&gt;</code> takes a boolean expression(<code>&lt;condition&gt;</code>) and executes the code within its <code>&lt;do&gt;</code> block as long as the expression is true</p>
+        <p>The expression is evaluated before each iteration of the loop</p>
+        <h4><code>&lt;equal&gt;</code></h4>
+        <p>Compare two values for equality</p>
+        <p><code>&lt;equal&gt;</code> takes two values and returns a boolean indicating whether they are equal</p>
+        <h3>Variables</h3>
+        <h4><code>&lt;let&gt;</code></h4>
+        <p>Declare a variable and optionally assign it a value</p>
+        <p><code>&lt;let&gt;</code> takes <code>&lt;mut&gt;</code>, <code>&lt;type&gt;</code>, and <code>&lt;name&gt;</code> attributes to declare a variable</p>
+        <p><code>&lt;mut&gt;</code> is a boolean value that determines whether the variable is mutable or immutable</p>
+        <p><code>&lt;type&gt;</code> is the data type of the variable</p>
+        <p><code>&lt;name&gt;</code> is the name of the variable</p>
+        <p><code>&lt;let&gt;</code> can also hold an element to assign an initial value to the variable</p>
+        <h4><code>&lt;set&gt;</code></h4>
+        <p>Assign a new value to an existing variable</p>
+        <p><code>&lt;set&gt;</code> takes a <code>&lt;name&gt;</code> attribute to assign a new value to an existing variable</p>
+        <p>Variables with mut=false are immutable and cannot be modified after creation</p>
+        <h4><code>&lt;get&gt;</code></h4>
+        <p>Retrieve the value of a variable</p>
+        <p><code>&lt;get&gt;</code> takes a <code>&lt;name&gt;</code> attribute to retrieve the value of an existing variable</p>
+        <h3>Literals</h3>
+        <h4><code>&lt;cast&gt;</code></h4>
+        <p>Convert a value to a different type</p>
+        <p><code>&lt;cast&gt;</code> takes a <code>&lt;type&gt;</code> attribute to specify the target type and an element to specify the value to convert</p>
+        <p>For example, <code>&lt;cast type="int"&gt;&lt;get name="my_string"/&gt;&lt;/cast&gt;</code> would convert the value of the variable "my_string" to an integer</p>
+        <h4><code>&lt;int&gt;</code></h4>
+        <p>Represent an integer literal</p>
+        <p><code>&lt;int&gt;</code> takes the element content to specify that it is an integer</p>
+        <h4><code>&lt;string&gt;</code></h4>
+        <p>Represent a string literal</p>
+        <p><code>&lt;string&gt;</code> takes the element content to specify that it is a string</p>
+        <h3>Functions</h3>
+        <h4><code>&lt;define&gt;</code></h4>
+        <p>Define a function with a name, arguments, and a body</p>
+        <p><code>&lt;name&gt;</code> is an element to specify the name of the function</p>
+        <p><code>&lt;arguments&gt;</code> is a list of <code>&lt;argument&gt;</code> elements that specify the name and type of each argument</p>
+        <p>Placing an element inside <code>&lt;arguments&gt;</code> sets a default value for that argument if no value is provided when the function is called</p>
+        <p>An argument of type code can contain executable code that can be executed by the <code>&lt;exec&gt;</code> function</p>
+        <p><code>&lt;body&gt;</code> is the code that is executed when the function is called</p>
+        <h4><code>&lt;return&gt;</code></h4>
+        <p>Return a value from a function</p>
+        <p><code>&lt;return&gt;</code> takes a value to return from the function</p>
+        <h3>Mathematics</h3>
+        <h4><code>&lt;subtract&gt;</code></h4>
+        <p>Subtract two numbers</p>
+        <p><code>&lt;subtract&gt;</code> takes two numbers and returns their difference</p>
+        <h4><code>&lt;add&gt;</code></h4>
+        <p>Surprisingly enough, add isn't actually a built-in operator in this language!</p>
+        <p>It can, however, be found in the math import</p>
+        <p>Speaking of imports...</p>
+        <h2>Primitives vs. Libraries</h2>
+        <p>XMPL intentionally keeps the set of language primitives small</p>
+        <p>Primitives are operations directly understood by the compiler</p>
+        <p>Higher-level operations can be implemented using those primitives and provided through imports</p>
+        <p>For example, <code>&lt;subtract&gt;</code> is a primitive, while addition is implemented in the math namespace using subtraction</p>
+        <h3>Imports</h3>
+        <p>XMPL has a built-in import system that allows you to import functions from other files</p>
+        <p><code>&lt;import&gt;</code> takes a <code>&lt;namespace&gt;</code> attribute to specify the namespace of the imported functions</p>
+        <p>Once imported, functions can be called using their element name with the <code>namespace</code> attribute</p>
+    </body>
+</html>

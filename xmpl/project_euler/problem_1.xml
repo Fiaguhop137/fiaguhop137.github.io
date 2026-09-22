@@ -1,0 +1,56 @@
+<import namespace="io"/>
+<import namespace="math"/>
+<import namespace="logic"/>
+<let mut=true type="uint" name="sum">0</let>
+<for namespace="logic">
+    <iterator>
+        <let mut=true type="uint" name="i">0</let>
+    </iterator>
+    <iteration>
+        <less_than namespace="math">
+            <get name="i"/>
+            <int>1000</int>
+        </less_than>
+    </iteration>
+    <iterate>
+        <set name="i">
+            <add namespace="math">
+                <get name="i"/>
+                <int>1</int>
+            </add>
+        </set>
+    </iterate>
+    <do>
+        <if>
+            <condition>
+                <or namespace="logic">
+                    <equal>
+                        <mod namespace="math">
+                            <get name="i"/>
+                            <int>3</int>
+                        </mod>
+                        <int>0</int>
+                    </equal>
+                    <equal>
+                        <mod namespace="math">
+                            <get name="i"/>
+                            <int>5</int>
+                        </mod>
+                        <int>0</int>
+                    </equal>
+                </or>
+            </condition>
+            <then>
+                <set name="sum">
+                    <add namespace="math">
+                        <get name="sum"/>
+                        <get name="i"/>
+                    </add>
+                </set>
+            </then>
+        </if>
+    </do>
+</for>
+<print namespace="io">
+    <get name="sum"/>
+</print>
