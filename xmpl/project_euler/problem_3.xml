@@ -1,0 +1,68 @@
+<import namespace="io"/>
+<import namespace="math"/>
+<let mut=true type="int" name="n">600851475143</let>
+<let mut=true type="int" name="factor">2</let>
+<let mut=true type="int" name="largest">0</let>
+<while>
+    <condition>
+        <or namespace="logic">
+            <less_than namespace="math">
+                <square namespace="math">
+                    <get name="factor"/>
+                </square>
+                <get name="n"/>
+            </less_than>
+            <equal>
+                <square namespace="math">
+                    <get name="factor"/>
+                </square>
+                <get name="n"/>
+            </equal>
+        </or>
+    </condition>
+    <do>
+        <if>
+            <condition>
+                <equal>
+                    <mod namespace="math">
+                        <get name="n"/>
+                        <get name="factor"/>
+                    </mod>
+                    <int>0</int>
+                </equal>
+            </condition>
+            <then>
+                <set name="largest">
+                    <get name="factor"/>
+                </set>
+                <set name="n">
+                    <divide namespace="math">
+                        <get name="n"/>
+                        <get name="factor"/>
+                    </divide>
+                </set>
+            </then>
+        </if>
+        <set name="factor">
+            <successor namespace="math">
+                <get name="factor"/>
+            </successor>
+        </set>
+    </do>
+</while>
+<if>
+    <condition>
+        <greater_than namespace="math">
+            <get name="n"/>
+            <int>1</int>
+        </greater_than>
+    </condition>
+    <then>
+        <set name="largest">
+            <get name="n"/>
+        </set>
+    </then>
+</if>
+<output namespace="io">
+    <get name="largest"/>
+</output>

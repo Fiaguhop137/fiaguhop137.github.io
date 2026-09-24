@@ -14,10 +14,9 @@
     </iteration>
     <iterate>
         <set name="i">
-            <add namespace="math">
+            <successor namespace="math">
                 <get name="i"/>
-                <int>1</int>
-            </add>
+            </successor>
         </set>
     </iterate>
     <do>
@@ -51,6 +50,6 @@
         </if>
     </do>
 </for>
-<print namespace="io">
+<output namespace="io">
     <get name="sum"/>
-</print>
+</output>

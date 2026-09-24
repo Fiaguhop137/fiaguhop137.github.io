@@ -130,16 +130,14 @@
                 </condition>
                 <do>
                     <set name="a2">
-                        <add namespace="math">
+                        <successor namespace="math">
                             <get name="a2"/>
-                            <int>1</int>
-                        </add>
+                        </successor>
                     </set>
                     <set name="b2">
-                        <add namespace="math">
+                        <successor namespace="math">
                             <get name="b2"/>
-                            <int>1</int>
-                        </add>
+                        </successor>
                     </set>
                     <if>
                         <condition>
@@ -211,10 +209,9 @@
                 </condition>
                 <do>
                     <set name="i">
-                        <add namespace="math">
+                        <successor namespace="math">
                             <get name="i"/>
-                            <int>1</int>
-                        </add>
+                        </successor>
                     </set>
                     <set name="result">
                         <add namespace="math">
@@ -239,40 +236,7 @@
             <let mut=true type="int" name="a2"><get name="a"/></let>
             <let mut=true type="int" name="b2"><get name="b"/></let>
             <let mut=true type="int" name="result">0</let>
-
-            <if>
-                <condition>
-                    <less_than namespace="math">
-                        <get name="b2"/>
-                        <int>0</int>
-                    </less_than>
-                </condition>
-                <then>
-                    <set name="a2">
-                        <subtract namespace="math">
-                            <int>0</int>
-                            <get name="a2"/>
-                        </subtract>
-                    </set>
-                    <set name="b2">
-                        <subtract namespace="math">
-                            <int>0</int>
-                            <get name="b2"/>
-                        </subtract>
-                    </set>
-                </then>
-            </if>
-            <if>
-                <condition>
-                    <less_than namespace="math">
-                        <get name="a2"/>
-                        <int>0</int>
-                    </less_than>
-                </condition>
-                <then>
-                    <!--one of the two numbers is negative, so we cant flip them. more advanced algorithms are needed for this case. do this in the morning-->
-                </then>
-            </if>
+            <let mut=true type="boolean" name="negative">false</let>
             <if>
                 <condition>
                     <equal>
@@ -284,6 +248,59 @@
                     <throw>
                         <string>Division by zero</string>
                     </throw>
+                </then>
+            </if>
+            <if>
+                <condition>
+                    <less_than namespace="math">
+                        <get name="a2"/>
+                        <int>0</int>
+                    </less_than>
+                </condition>
+                <then>
+                    <set name="a2">
+                        <subtract namespace="math">
+                            <int>0</int>
+                            <get name="a2"/>
+                        </subtract>
+                    </set>
+                    <set name="negative">
+                        <boolean>true</boolean>
+                    </set>
+                </then>
+            </if>
+            <if>
+                <condition>
+                    <less_than namespace="math">
+                        <get name="b2"/>
+                        <int>0</int>
+                    </less_than>
+                </condition>
+                <then>
+                    <set name="b2">
+                        <subtract namespace="math">
+                            <int>0</int>
+                            <get name="b2"/>
+                        </subtract>
+                    </set>
+                    <if>
+                        <condition>
+                            <equal>
+                                <get name="negative"/>
+                                <boolean>false</boolean>
+                            </equal>
+                        </condition>
+                        <then>
+                            <set name="negative">
+                                <boolean>true</boolean>
+                            </set>
+                        </then>
+                        <else>
+                            <set name="negative">
+                                <boolean>false</boolean>
+                            </set>
+                        </else>
+                    </if>
                 </then>
             </if>
             <while>
@@ -301,20 +318,35 @@
                         </subtract>
                     </set>
                     <set name="result">
-                        <add namespace="math">
+                        <successor namespace="math">
                             <get name="result"/>
-                            <int>1</int>
-                        </add>
+                        </successor>
                     </set>
                 </do>
             </while>
+            <if>
+                <condition>
+                    <equal>
+                        <get name="negative"/>
+                        <boolean>true</boolean>
+                    </equal>
+                </condition>
+                <then>
+                    <return>
+                        <subtract namespace="math">
+                            <int>0</int>
+                            <get name="result"/>
+                        </subtract>
+                    </return>
+                </then>
+            </if>
             <return>
                 <get name="result"/>
             </return>
         </body>
     </define>
     <define>
-        <name>mod</name>
+    <name>mod</name>
         <arguments>
             <argument mut=false type="int" name="a"></argument>
             <argument mut=false type="int" name="b"></argument>
@@ -322,6 +354,7 @@
         <body>
             <let mut=true type="int" name="a2"><get name="a"/></let>
             <let mut=true type="int" name="b2"><get name="b"/></let>
+            <let mut=true type="boolean" name="negative">false</let>
             <if>
                 <condition>
                     <equal>
@@ -337,47 +370,8 @@
             </if>
             <if>
                 <condition>
-                    <equal>
-                        <get name="a2"/>
-                        <int>0</int>
-                    </equal>
-                </condition>
-                <then>
-                    <return>
-                        <int>0</int>
-                    </return>
-                </then>
-            </if>
-            <if>
-                <condition>
                     <less_than namespace="math">
                         <get name="a2"/>
-                        <get name="b2"/>
-                    </less_than>
-                </condition>
-                <then>
-                    <return>
-                        <get name="a2"/>
-                    </return>
-                </then>
-            </if>
-            <if>
-                <condition>
-                    <equal>
-                        <get name="a2"/>
-                        <get name="b2"/>
-                    </equal>
-                </condition>
-                <then>
-                    <return>
-                        <int>0</int>
-                    </return>
-                </then>
-            </if>
-            <if>
-                <condition>
-                    <less_than namespace="math">
-                        <get name="b2"/>
                         <int>0</int>
                     </less_than>
                 </condition>
@@ -388,23 +382,25 @@
                             <get name="a2"/>
                         </subtract>
                     </set>
-                    <set name="b2">
-                        <subtract namespace="math">
-                            <int>0</int>
-                            <get name="b2"/>
-                        </subtract>
+                    <set name="negative">
+                        <boolean>true</boolean>
                     </set>
                 </then>
             </if>
             <if>
                 <condition>
                     <less_than namespace="math">
-                        <get name="a2"/>
+                        <get name="b2"/>
                         <int>0</int>
                     </less_than>
                 </condition>
                 <then>
-                    <!--one of the two numbers is negative, so we cant flip them. more advanced algorithms are needed for this case. do this in the morning-->
+                    <set name="b2">
+                        <subtract namespace="math">
+                            <int>0</int>
+                            <get name="b2"/>
+                        </subtract>
+                    </set>
                 </then>
             </if>
             <while>
@@ -423,8 +419,82 @@
                     </set>
                 </do>
             </while>
+            <if>
+                <condition>
+                    <equal>
+                        <get name="negative"/>
+                        <boolean>true</boolean>
+                    </equal>
+                </condition>
+                <then>
+                    <return>
+                        <subtract namespace="math">
+                            <int>0</int>
+                            <get name="a2"/>
+                        </subtract>
+                    </return>
+                </then>
+            </if>
             <return>
                 <get name="a2"/>
+            </return>
+        </body>
+    </define>
+    <define>
+        <name>square</name>
+        <arguments>
+            <argument mut=false type="int" name="a"></argument>
+        </arguments>
+        <body>
+            <return>
+                <multiply namespace="math">
+                    <get name="a"/>
+                    <get name="a"/>
+                </multiply>
+            </return>
+        </body>
+    </define>
+    <define>
+        <name>sqrt</name>
+        <arguments>
+            <argument mut=false type="int" name="a"></argument>
+        </arguments>
+        <body>
+            <let mut=true type="int" name="result">0</let>
+            <while>
+                <condition>
+                    <less_than namespace="math">
+                        <multiply namespace="math">
+                            <get name="result"/>
+                            <get name="result"/>
+                        </multiply>
+                        <get name="a"/>
+                    </less_than>
+                </condition>
+                <do>
+                    <set name="result">
+                        <successor namespace="math">
+                            <get name="result"/>
+                        </successor>
+                    </set>
+                </do>
+            </while>
+            <return>
+                <get name="result"/>
+            </return>
+        </body>
+    </define>
+    <define>
+        <name>successor</name>
+        <arguments>
+            <argument mut=false type="int" name="a"></argument>
+        </arguments>
+        <body>
+            <return>
+                <add namespace="math">
+                    <get name="a"/>
+                    <int>1</int>
+                </add>
             </return>
         </body>
     </define>

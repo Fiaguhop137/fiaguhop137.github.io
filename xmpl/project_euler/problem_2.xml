@@ -45,6 +45,6 @@
         </set>
     </do>
 </while>
-<print namespace="io">
+<output namespace="io">
     <get name="sum"/>
-</print>
+</output>

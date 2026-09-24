@@ -2,9 +2,9 @@
 <import namespace="math"/>
 <import namespace="logic"/>
 <let mut=false type="int" name="x">10</let>
-<print namespace="io">
+<output namespace="io">
     <get name="x"/>
-</print>
+</output>
 <for namespace="logic">
     <iterator>
         <let mut=true type="int" name="i">0</let>
@@ -17,10 +17,9 @@
     </iteration>
     <iterate>
         <set name="i">
-            <add namespace="math">
+            <successor namespace="math">
                 <get name="i"/>
-                <int>1</int>
-            </add>
+            </successor>
         </set>
     </iterate>
     <do>
@@ -32,10 +31,10 @@
                 </equal>
             </condition>
             <then>
-                <print namespace="io">i is 10</print>
+                <output namespace="io">i is 10</output>
             </then>
             <else>
-                <print namespace="io">i is not 10</print>
+                <output namespace="io">i is not 10</output>
             </else>
         </if>
     </do>
@@ -44,7 +43,7 @@
     <name>meow</name>
     <let mut=false type="int" name="cats">5</let>
     <define>
-        <name>print_cats</name>
+        <name>output_cats</name>
         <arguments>
             <argument mut=false type="int" name="num">0</argument>
         </arguments>
@@ -61,19 +60,18 @@
                 </iteration>
                 <iterate>
                     <set name="i">
-                        <add namespace="math">
+                        <successor namespace="math">
                             <get name="i"/>
-                            <int>1</int>
-                        </add>
+                        </successor>
                     </set>
                 </iterate>
                 <do>
-                    <print namespace="io">meow</print>
+                    <output namespace="io">meow</output>
                 </do>
             </for>
         </body>
     </define>
 </namespace>
-<print_cats namespace="meow">
+<output_cats namespace="meow">
     <get name="cats" namespace="meow"/>
-</print_cats>
+</output_cats>

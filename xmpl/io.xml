@@ -1,0 +1,31 @@
+<namespace>
+    <name>io</name>
+    <define>
+        <name>output</name>
+        <arguments>
+            <argument mut=false type="string" name="value"></argument>
+        </arguments>
+        <body>
+            <write file="stdout">
+                <get name="value"/>
+            </write>
+        </body>
+    </define>
+    <define>
+        <name>input</name>
+        <arguments>
+            <argument mut=false type="string" name="prompt"></argument>
+        </arguments>
+        <body>
+            <output namespace="io">
+                <get name="prompt"/>
+            </output>
+            <read file="stdin">
+                <let mut=true type="string" name="result"></let>
+            </read>
+            <return>
+                <get name="result"/>
+            </return>
+        </body>
+    </define>
+</namespace>
