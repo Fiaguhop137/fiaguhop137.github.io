@@ -3,8 +3,8 @@
     <define>
         <name>add</name>
         <arguments>
-            <argument mut=false type="int" name="a"><gument>
-            <argument mut=false type="int" name="b"><gument>
+            <argument mut=false type="int" name="a"><argument>
+            <argument mut=false type="int" name="b"><argument>
         </arguments>
         <body>
             <return>
@@ -21,8 +21,8 @@
     <define>
         <name>subtract</name>
         <arguments>
-            <argument mut=false type="int" name="a"><gument>
-            <argument mut=false type="int" name="b"><gument>
+            <argument mut=false type="int" name="a"><argument>
+            <argument mut=false type="int" name="b"><argument>
         </arguments>
         <body>
             <return>
@@ -36,8 +36,8 @@
     <define>
         <name>less_than</name>
         <arguments>
-            <argument mut=false type="int" name="a"><gument>
-            <argument mut=false type="int" name="b"><gument>
+            <argument mut=false type="int" name="a"><argument>
+            <argument mut=false type="int" name="b"><argument>
         </arguments>
         <body>
             <let mut=true type="int" name="a2"><get name="a"/></let>
@@ -245,9 +245,9 @@
                     </equal>
                 </condition>
                 <then>
-                    <throw>
+                    <write file="stderr">
                         <string>Division by zero</string>
-                    </throw>
+                    </write>
                 </then>
             </if>
             <if>
@@ -363,9 +363,9 @@
                     </equal>
                 </condition>
                 <then>
-                    <throw>
+                    <write file="stderr">
                         <string>Division by zero</string>
-                    </throw>
+                    </write>
                 </then>
             </if>
             <if>

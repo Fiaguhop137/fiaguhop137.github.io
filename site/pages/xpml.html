@@ -7,9 +7,11 @@
         <title>XMPL: eXtensible Markup Programming Language</title>
         <style> iframe{display:block;border:none;}</style>
         <link rel="stylesheet" href="../stylesheets/xmpl.css">
+        <script src="../scripts/xmpl.js"></script>
+        <link rel="icon" href="../assets/xmpl_logo.svg" type="image/svg+xml">
     </head>
     <body>
-        <h1>XMPL: eXtensible Markup Programming Language</h1>
+        <h1><img src="../assets/xmpl_logo.svg" alt="XMPL Logo" width="70" height="30">XMPL: eXtensible Markup Programming Language</h1>
         <p>Welcome to the eXtensible Markup Programming Language!</p>
         <h2>Language Primitives</h2>
         <h3>Logic</h3>
@@ -84,5 +86,27 @@
         <p>For example, the math library provides functions for basic arithmetic operations, as well as more advanced mathematical functions</p>
         <p>There are also example programs provided in the <code>xmpl</code> directory that demonstrate how to use the language and its standard libraries.</p>
         <p>These examples can serve as a starting point for creating your own programs in XMPL.</p>
+        <p>Choose an example from the dropdown below to see its code:</p>
+        <select id="example-select" onchange="loadExample(this.value,true)">
+            <option value="">Select an example</option>
+            <option value="../assets/xmpl/example.xml">Example</option>
+            <option value="../assets/xmpl/io.xml">Standard Input/Output Library</option>
+            <option value="../assets/xmpl/logic.xml">Standard Logic Library</option>
+            <option value="../assets/xmpl/math.xml">Standard Math Library</option>
+            <option value="../assets/xmpl/project_euler/prob001.xml">Project Euler Problem 1</option>
+            <option value="../assets/xmpl/project_euler/prob002.xml">Project Euler Problem 2</option>
+            <option value="../assets/xmpl/project_euler/prob003.xml">Project Euler Problem 3</option>
+        </select>
+        <pre id="example-code">Example code will be displayed here.</pre>
+        <select id="example-select2" onchange="loadExample(this.value)" hidden  >
+            <option value="">Select an example</option>
+            <option value="../assets/xmpl/example.xml">Example</option>
+            <option value="../assets/xmpl/io.xml">Standard Input/Output Library</option>
+            <option value="../assets/xmpl/logic.xml">Standard Logic Library</option>
+            <option value="../assets/xmpl/math.xml">Standard Math Library</option>
+            <option value="../assets/xmpl/project_euler/prob001.xml">Project Euler Problem 1</option>
+            <option value="../assets/xmpl/project_euler/prob002.xml">Project Euler Problem 2</option>
+            <option value="../assets/xmpl/project_euler/prob003.xml">Project Euler Problem 3</option>
+        </select>
     </body>
 </html>
