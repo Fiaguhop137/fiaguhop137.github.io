@@ -1,3 +1,4 @@
+<xmpl>
 <import namespace="io"/>
 <import namespace="math"/>
 <let mut=true type="int" name="n">600851475143</let>
@@ -66,3 +67,4 @@
 <output namespace="io">
     <get name="largest"/>
 </output>
+<xmpl/>

@@ -1,5 +1,5 @@
-<namespace>
-    <name>logic</name>
+<xmpl>
+<namespace name="logic">
     <define>
         <name>for</name>
         <arguments>
@@ -110,3 +110,4 @@
         </body>
     </define>
 </namespace>
+<xmpl/>

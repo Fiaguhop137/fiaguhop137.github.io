@@ -1,3 +1,4 @@
+<xmpl>
 <import namespace="io"/>
 <import namespace="math"/>
 <import namespace="logic"/>
@@ -53,3 +54,4 @@
 <output namespace="io">
     <get name="sum"/>
 </output>
+<xmpl/>

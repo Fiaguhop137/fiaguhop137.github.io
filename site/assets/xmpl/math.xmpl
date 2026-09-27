@@ -1,5 +1,5 @@
-<namespace>
-    <name>math</name>
+<xmpl>
+<namespace name="math">
     <define>
         <name>add</name>
         <arguments>
@@ -499,3 +499,4 @@
         </body>
     </define>
 </namespace>
+<xmpl/>

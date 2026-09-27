@@ -1,3 +1,4 @@
+<xmpl>
 <import namespace="io"/>
 <import namespace="math"/>
 <let mut=true type="int" name="x">10</let>
@@ -10,3 +11,4 @@
 <print namespace="io">
     <get name="x"/>
 </print>
+<xmpl/>

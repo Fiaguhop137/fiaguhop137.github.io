@@ -1,3 +1,4 @@
+<xmpl>
 <import namespace="io"/>
 <import namespace="math"/>
 <import namespace="logic"/>
@@ -39,8 +40,7 @@
         </if>
     </do>
 </for>
-<namespace>
-    <name>meow</name>
+<namespace name="meow">
     <let mut=false type="int" name="cats">5</let>
     <define>
         <name>output_cats</name>
@@ -75,3 +75,4 @@
 <output_cats namespace="meow">
     <get name="cats" namespace="meow"/>
 </output_cats>
+<xmpl/>

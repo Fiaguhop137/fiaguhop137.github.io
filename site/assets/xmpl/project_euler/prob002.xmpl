@@ -1,3 +1,4 @@
+<xmpl>
 <import namespace="io"/>
 <import namespace="math"/>
 <let mut=true type="int" name="x">0</let>
@@ -48,3 +49,4 @@
 <output namespace="io">
     <get name="sum"/>
 </output>
+<xmpl/>

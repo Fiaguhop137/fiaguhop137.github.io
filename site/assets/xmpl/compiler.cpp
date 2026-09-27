@@ -25,7 +25,7 @@ std::pair<std::filesystem::path,std::filesystem::path> parseArgs(int argc,char* 
             exit(0);
         }
         if(std::string_view(argv[i])=="-v"||std::string_view(argv[i])=="--version"){
-            cout<<"Compiler version: 0.0.10\n";
+            cout<<"Compiler version: 0.0.11\n";
             exit(0);
         }
         if(std::string_view(argv[i])=="-o"||std::string_view(argv[i])=="--output"){

@@ -1,5 +1,5 @@
-<namespace>
-    <name>io</name>
+<xmpl>
+<namespace name="io">
     <define>
         <name>output</name>
         <arguments>
@@ -29,3 +29,4 @@
         </body>
     </define>
 </namespace>
+<xmpl/>
