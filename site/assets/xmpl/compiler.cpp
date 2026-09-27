@@ -6,8 +6,15 @@
 #include <string>
 #include <iterator>
 #include <chrono>
+#include <variant>
 using std::cout;
 bool verbose=false;
+struct variable{
+    std::string name;
+    std::string type;
+    std::variant<int,bool,std::string> value;
+    bool mut;
+};
 std::pair<std::filesystem::path,std::filesystem::path> parseArgs(int argc,char* argv[]){
     if(argc<2){
         std::cerr<<"Usage: "<<argv[0]<<" <input_file>\n";
@@ -21,12 +28,12 @@ std::pair<std::filesystem::path,std::filesystem::path> parseArgs(int argc,char* 
             cout<<"Flags:\n";
             cout<<"  -o, --output <output_file>   Specify the output file name (default: a.out)\n";
             cout<<"  -h, --help                   Show this help message\n";
-            cout<<"  --version                    Show the version of the compiler\n";
+            cout<<"  -V, --version                Show the version of the compiler\n";
             cout<<"  -v, --verbose                Show verbose output\n";
             exit(0);
         }
-        if(std::string_view(argv[i])=="-v"||std::string_view(argv[i])=="--version"){
-            cout<<"Compiler version: 0.1.2\n";
+        if(std::string_view(argv[i])=="-V"||std::string_view(argv[i])=="--version"){
+            cout<<"Compiler version: 0.1.4\n";
             exit(0);
         }
         if(std::string_view(argv[i])=="-v"||std::string_view(argv[i])=="--verbose"){
@@ -80,6 +87,39 @@ std::string strip_xmpl_tags(const std::string& input) {
     }
     return "";
 }
+std::string resolve_imports(std::string input,const std::filesystem::path& source_dir,const std::filesystem::path& assets_dir){
+    while(input.find("<import")!=std::string::npos){
+        size_t import_start=input.find("<import");
+        size_t import_end=input.find("/>",import_start);
+        if(import_end==std::string::npos){
+            std::cerr<<"Input file has invalid import statement\n";
+            exit(1);
+        }
+        std::string import_content=input.substr(import_start+8,import_end-import_start-8);
+        std::string import_namespace=extract_namespace(import_content);
+        if(verbose){cout<<"Importing namespace: "<<import_namespace<<"\n";}
+        std::filesystem::path import_file_path=std::filesystem::current_path();
+        for(const auto& dir:{source_dir,assets_dir}){
+            import_file_path=dir/(import_namespace+".xmpl");
+            if(std::filesystem::exists(import_file_path)){
+                break;
+            }
+        }
+        if(!std::filesystem::exists(import_file_path)){
+            std::cerr<<"Could not find import file for namespace: "<<import_namespace<<"\n";
+            exit(1);
+        }
+        std::ifstream import_file(import_file_path);
+        if(!import_file.is_open()){
+            std::cerr<<"Could not open import file: "<<import_file_path<<"\n";
+            exit(1);
+        }
+        std::string import_file_content((std::istreambuf_iterator<char>(import_file)),std::istreambuf_iterator<char>());
+        import_file_content=strip_xmpl_tags(import_file_content);
+        input.replace(import_start,import_end-import_start+2,import_file_content);
+    }
+    return input;
+}
 int main(int argc,char* argv[]){
     auto[input,output]=parseArgs(argc,argv);
     std::ifstream input_file(input);
@@ -93,36 +133,12 @@ int main(int argc,char* argv[]){
         tmpfile="xmpl_tmp_"+std::to_string(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count())+".cpp";
     }
     input_file_content=strip_xmpl_tags(input_file_content);
-    while(input_file_content.find("<import")!=std::string::npos){
-        size_t import_start=input_file_content.find("<import");
-        size_t import_end=input_file_content.find("/>",import_start);
-        std::string import_content=input_file_content.substr(import_start+8,import_end-import_start-8);
-        std::string import_namespace=extract_namespace(import_content);
-        if(verbose){cout<<"Importing namespace: "<<import_namespace<<"\n";}
-        std::filesystem::path import_file_path=import_namespace+".xmpl";
-        if(!std::filesystem::exists(import_file_path)){
-            std::cerr<<"Import file does not exist: "<<import_file_path<<"\n";
-            exit(1);
-        }
-        std::ifstream import_file(import_file_path);
-        if(!import_file.is_open()){
-            std::cerr<<"Could not open import file: "<<import_file_path<<"\n";
-            exit(1);
-        }
-        std::string import_file_content((std::istreambuf_iterator<char>(import_file)),std::istreambuf_iterator<char>());
-        size_t import_starter=import_file_content.find("<xmpl>");
-        size_t import_ender=import_file_content.find("</xmpl>");
-        if(import_starter==std::string::npos||import_ender==std::string::npos||import_starter>import_ender){
-            std::cerr<<"Import file is not a valid xmpl file: "<<import_file_path<<"\n";
-            exit(1);
-        }
-        import_file_content.erase(import_ender,std::string::npos);
-        import_file_content.erase(0,import_starter+6);
-        input_file_content.replace(import_start,import_end-import_start+2,import_file_content);
-        if(import_end==std::string::npos){
-            std::cerr<<"Input file has invalid import statement\n";
-            exit(1);
-        }
+    input_file_content=resolve_imports(input_file_content,input.parent_path(),std::filesystem::absolute(argv[0]).parent_path());
+    std::ofstream tmpfile_stream(tmpfile);
+    if(!tmpfile_stream.is_open()){
+        std::cerr<<"Could not create temporary file: "<<tmpfile<<"\n";
+        exit(1);
     }
-    cout<<input_file_content<<"\n";
+    
+    if(verbose){cout<<input_file_content<<"\n";}
 }
