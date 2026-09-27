@@ -67,4 +67,4 @@
 <output namespace="io">
     <get name="largest"/>
 </output>
-<xmpl/>
+</xmpl>

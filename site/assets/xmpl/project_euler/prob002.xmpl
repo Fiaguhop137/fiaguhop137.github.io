@@ -49,4 +49,4 @@
 <output namespace="io">
     <get name="sum"/>
 </output>
-<xmpl/>
+</xmpl>

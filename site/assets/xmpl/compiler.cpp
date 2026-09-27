@@ -6,7 +6,6 @@
 #include <string>
 #include <iterator>
 #include <chrono>
-#include "tinyxml2.h"
 using std::cout;
 std::pair<std::filesystem::path,std::filesystem::path> parseArgs(int argc,char* argv[]){
     if(argc<2){
@@ -25,7 +24,7 @@ std::pair<std::filesystem::path,std::filesystem::path> parseArgs(int argc,char* 
             exit(0);
         }
         if(std::string_view(argv[i])=="-v"||std::string_view(argv[i])=="--version"){
-            cout<<"Compiler version: 0.0.11\n";
+            cout<<"Compiler version: 0.0.15\n";
             exit(0);
         }
         if(std::string_view(argv[i])=="-o"||std::string_view(argv[i])=="--output"){
@@ -62,6 +61,20 @@ int main(int argc,char* argv[]){
         exit(1);
     }
     std::string input_file_content((std::istreambuf_iterator<char>(input_file)),std::istreambuf_iterator<char>());
-    cout<<input_file_content<<"\n";
     std::filesystem::path tmpfile="xmpl_tmp_"+std::to_string(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count())+".cpp";
+    //sanity checks
+    if(std::filesystem::exists(tmpfile)){
+        std::cerr<<"Temporary file already exists: "<<tmpfile<<"\n";
+        std::cout<<"Re-running the compiler usually fixes this issue. If not, please delete all files starting with 'xmpl_tmp_' and try again.\n";
+        exit(1);
+    }
+    size_t starter=input_file_content.find("<xmpl");
+    size_t ender=input_file_content.find("</xmpl>");
+    if(starter==std::string::npos||ender==std::string::npos||starter>ender){
+        std::cerr<<"Input file is not a valid xmpl file\n";
+        exit(1);
+    }
+    input_file_content.erase(ender+7,std::string::npos);
+    input_file_content.erase(0,starter);
+    cout<<input_file_content<<"\n";
 }

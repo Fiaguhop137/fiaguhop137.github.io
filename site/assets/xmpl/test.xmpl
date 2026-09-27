@@ -11,4 +11,4 @@
 <print namespace="io">
     <get name="x"/>
 </print>
-<xmpl/>
+</xmpl>

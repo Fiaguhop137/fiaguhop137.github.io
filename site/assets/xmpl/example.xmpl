@@ -75,4 +75,4 @@
 <output_cats namespace="meow">
     <get name="cats" namespace="meow"/>
 </output_cats>
-<xmpl/>
+</xmpl>
