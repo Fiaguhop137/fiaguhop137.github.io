@@ -3,8 +3,8 @@
     <define>
         <name>add</name>
         <arguments>
-            <argument mut=false type="int" name="a"><argument>
-            <argument mut=false type="int" name="b"><argument>
+            <argument mut=false type="int" name="a"></argument>
+            <argument mut=false type="int" name="b"></argument>
         </arguments>
         <body>
             <return>
@@ -21,8 +21,8 @@
     <define>
         <name>subtract</name>
         <arguments>
-            <argument mut=false type="int" name="a"><argument>
-            <argument mut=false type="int" name="b"><argument>
+            <argument mut=false type="int" name="a"></argument>
+            <argument mut=false type="int" name="b"></argument>
         </arguments>
         <body>
             <return>

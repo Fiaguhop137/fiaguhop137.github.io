@@ -1,7 +1,6 @@
 <xmpl>
 <namespace name="logic">
-    <define>
-        <name>for</name>
+    <define name="for">
         <arguments>
             <argument mut=false type="code" name="iterator"></argument>
             <argument mut=false type="code" name="iteration"></argument>
@@ -27,8 +26,7 @@
             </while>
         </body>
     </define>
-    <define>
-        <name>or</name>
+    <define name="or">
         <arguments>
             <argument mut=false type="boolean" name="a"></argument>
             <argument mut=false type="boolean" name="b"></argument>
@@ -59,8 +57,7 @@
             </return>
         </body>
     </define>
-    <define>
-        <name>and</name>
+    <define name="and">
         <arguments>
             <argument mut=false type="boolean" name="a"></argument>
             <argument mut=false type="boolean" name="b"></argument>
@@ -88,8 +85,7 @@
             </return>
         </body>
     </define>
-    <define>
-        <name>not</name>
+    <define name="not">
         <arguments>
             <argument mut=false type="boolean" name="a"></argument>
         </arguments>
@@ -107,6 +103,53 @@
             <return>
                 <boolean>true</boolean>
             </return>
+        </body>
+    </define>
+    <define name="pass">
+        <arguments>
+            <argument mut=false type="string" name="type"><string></string></argument>
+        </arguments>
+        <body>
+            <if>
+                <condition>
+                    <equal>
+                        <get name="type"/>
+                        <string>int</string>
+                    </equal>
+                </condition>
+                <then>
+                    <return>
+                        <int>0</int>
+                    </return>
+                </then>
+            </if>
+            <if>
+                <condition>
+                    <equal>
+                        <get name="type"/>
+                        <string>string</string>
+                    </equal>
+                </condition>
+                <then>
+                    <return>
+                        <string></string>
+                    </return>
+                </then>
+            </if>
+            <if>
+                <condition>
+                    <equal>
+                        <get name="type"/>
+                        <string>boolean</string>
+                    </equal>
+                </condition>
+                <then>
+                    <return>
+                        <boolean>false</boolean>
+                    </return>
+                </then>
+            </if>
+            <return></return>
         </body>
     </define>
 </namespace>

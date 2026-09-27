@@ -1,9 +1,8 @@
 <xmpl>
 <import namespace="io"/>
-<import namespace="math"/>
 <let mut=true type="int" name="x">10</let>
 <set name="x">
-    <subtract namespace="math">
+    <subtract>
         <get name="x"/>
         <int>3</int>
     </subtract>
