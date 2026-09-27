@@ -1,0 +1,12 @@
+<import namespace="io"/>
+<import namespace="math"/>
+<let mut=true type="int" name="x">10</let>
+<set name="x">
+    <subtract namespace="math">
+        <get name="x"/>
+        <int>3</int>
+    </subtract>
+</set>
+<print namespace="io">
+    <get name="x"/>
+</print>
