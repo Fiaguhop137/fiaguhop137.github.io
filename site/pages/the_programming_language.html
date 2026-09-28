@@ -1,0 +1,180 @@
+<h1 id="language-documentation">Language Documentation</h1>
+<p>A statically typed, C-style programming language designed around explicit declarations, predictable syntax, and minimal historical baggage.</p>
+<h2 id="variables">Variables</h2>
+<p>Variables are declared using <code>let</code>. Every declaration must explicitly specify whether the variable is mutable or constant.</p>
+<pre><code class="lang-text"><span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">10</span>;
+<span class="hljs-keyword">let</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> y = <span class="hljs-number">20</span>;
+</code></pre>
+<p>Mutable variables can be reassigned with <code>set</code>:</p>
+<pre><code class="lang-text"><span class="hljs-attribute">let mut int x</span> = 10;
+
+<span class="hljs-attribute">set x</span> = 12;
+</code></pre>
+<p>Reassignment does not change the variable&#39;s type:</p>
+<pre><code class="lang-text">let mut int x = <span class="hljs-number">10</span>;
+
+<span class="hljs-keyword">set</span> x <span class="hljs-comment">= 12</span>;       <span class="hljs-comment">// valid</span>
+<span class="hljs-keyword">set</span> x <span class="hljs-comment">=</span> <span class="hljs-comment">"hello"</span>;  <span class="hljs-comment">// invalid</span>
+</code></pre>
+<p>A declaration without a mutability modifier is invalid:</p>
+<pre><code class="lang-text"><span class="hljs-keyword">let</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">10</span>; <span class="hljs-comment">// invalid</span>
+</code></pre>
+<p>The language does not assume mutability or immutability. The programmer must explicitly choose.</p>
+<h2 id="shadowing">Shadowing</h2>
+<p>Variables may shadow existing variables, including variables with the same name and in the same scope.</p>
+<pre><code class="lang-text"><span class="hljs-keyword">let</span> mut <span class="hljs-keyword">int</span> x = <span class="hljs-number">10</span>;
+
+<span class="hljs-keyword">let</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">20</span>;
+
+<span class="hljs-keyword">set</span> x = <span class="hljs-number">30</span>; <span class="hljs-comment">// invalid</span>
+</code></pre>
+<p>The second <code>x</code> shadows the first <code>x</code>. The active <code>x</code> is therefore the constant.</p>
+<p>The language does not restrict what can be shadowed. Yes, this means you can do things that make future-you question your life choices.</p>
+<h2 id="type-inference">Type Inference</h2>
+<p>Type inference is explicitly requested using <code>auto</code>.</p>
+<pre><code class="lang-text"><span class="hljs-keyword">let</span> mut <span class="hljs-built_in">auto</span> x = <span class="hljs-number">5</span>;
+<span class="hljs-keyword">let</span> <span class="hljs-keyword">const</span> <span class="hljs-built_in">auto</span> name = <span class="hljs-string">"hello"</span>;
+</code></pre>
+<p><code>auto</code> determines the type from the value provided during initialization.</p>
+<p>Explicit types remain available:</p>
+<pre><code class="lang-text"><span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">5</span>;
+</code></pre>
+<p>This distinction allows programmers to choose between explicit typing and inference.</p>
+<h2 id="assignment">Assignment</h2>
+<p>Variables are modified using <code>set</code>.</p>
+<pre><code class="lang-text"><span class="hljs-keyword">set</span> x <span class="hljs-comment">= 15</span>;
+</code></pre>
+<p>A constant cannot be modified:</p>
+<pre><code class="lang-text"><span class="hljs-keyword">let</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">10</span>;
+
+<span class="hljs-keyword">set</span> x = <span class="hljs-number">15</span>; <span class="hljs-comment">// invalid</span>
+</code></pre>
+<h2 id="conditionals">Conditionals</h2>
+<p>Conditional statements use C-style blocks.</p>
+<pre><code class="lang-text"><span class="hljs-keyword">if</span>(condition){
+    <span class="hljs-built_in">io</span>.conout(<span class="hljs-string">"true"</span>);
+}<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(other_condition){
+    <span class="hljs-built_in">io</span>.conout(<span class="hljs-string">"other"</span>);
+}<span class="hljs-keyword">else</span>{
+    <span class="hljs-built_in">io</span>.conout(<span class="hljs-string">"false"</span>);
+};
+</code></pre>
+<p>The semicolon terminates the entire conditional chain.</p>
+<p>An <code>if</code> without an <code>else</code> is terminated directly:</p>
+<pre><code class="lang-text">if(condition){
+    io.conout(<span class="hljs-string">"true"</span>)<span class="hljs-comment">;</span>
+}<span class="hljs-comment">;</span>
+</code></pre>
+<p>When an <code>else</code> follows, the semicolon belongs after the complete chain.</p>
+<h2 id="loops">Loops</h2>
+<p><code>while</code> loops repeatedly execute while their condition is true.</p>
+<pre><code class="lang-text">while(condition){
+    io.conout(<span class="hljs-string">"running"</span>)<span class="hljs-comment">;</span>
+}<span class="hljs-comment">;</span>
+</code></pre>
+<p><code>for</code> loops iterate over a collection.</p>
+<pre><code class="lang-text"><span class="hljs-keyword">for</span>(<span class="hljs-built_in">item</span>) <span class="hljs-keyword">in</span>(items){
+    io.conout(<span class="hljs-built_in">item</span>);
+};
+</code></pre>
+<p>Here, <code>item</code> represents the current element and <code>items</code> represents the collection being iterated over.</p>
+<h2 id="functions">Functions</h2>
+<p>Functions are declared using <code>fn</code>.</p>
+<pre><code class="lang-text"><span class="hljs-function">fn <span class="hljs-keyword">int</span> <span class="hljs-title">foo</span><span class="hljs-params">()</span></span>{
+    <span class="hljs-keyword">return</span>(<span class="hljs-number">10</span>);
+};
+</code></pre>
+<p>The return type appears before the function name.</p>
+<p>Functions are constant by default, so there is no need to specify <code>const</code> on the function itself.</p>
+<p>Function parameters use normal variable declarations:</p>
+<pre><code class="lang-text"><span class="hljs-function">fn <span class="hljs-keyword">int</span> <span class="hljs-title">foo</span><span class="hljs-params">(let <span class="hljs-keyword">const</span> <span class="hljs-keyword">auto</span> bar)</span></span>{
+    <span class="hljs-keyword">return</span>(<span class="hljs-number">1</span>);
+};
+</code></pre>
+<p>Multiple parameter types are supported:</p>
+<pre><code class="lang-text"><span class="hljs-function">fn <span class="hljs-keyword">int</span> <span class="hljs-title">add</span>(<span class="hljs-params"><span class="hljs-keyword">let</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> a, <span class="hljs-keyword">let</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> b</span>)</span>{
+    <span class="hljs-keyword">return</span>(a + b);
+};
+</code></pre>
+<p>The <code>auto</code> type allows a parameter to accept values whose type is determined dynamically:</p>
+<pre><code class="lang-text"><span class="hljs-function"><span class="hljs-keyword">fn</span> int foo<span class="hljs-params">(<span class="hljs-keyword">let</span> const auto <span class="hljs-built_in">bar</span>)</span>{
+    <span class="hljs-keyword">return</span><span class="hljs-params">(<span class="hljs-built_in">bar</span> + <span class="hljs-number">1</span>)</span></span>;
+};
+</code></pre>
+<p>Operations performed on an <code>auto</code> value may fail if the supplied value does not support that operation.</p>
+<p>For example, passing a string to the function above would cause the addition operation to fail.</p>
+<h2 id="return-values">Return Values</h2>
+<p>Functions return values using <code>return</code>.</p>
+<pre><code class="lang-text"><span class="hljs-function">fn <span class="hljs-keyword">string</span> <span class="hljs-title">cat_floofiness</span>(<span class="hljs-params"><span class="hljs-keyword">let</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">bool</span> fluffy</span>)</span>{
+    <span class="hljs-keyword">if</span>(fluffy){
+        <span class="hljs-keyword">return</span>(<span class="hljs-string">"verily"</span>);
+    }<span class="hljs-keyword">else</span>{
+        <span class="hljs-keyword">return</span>(<span class="hljs-string">"sadly not"</span>);
+    };
+};
+</code></pre>
+<p>Function return values are ordinary values. A function does not need a <code>mut</code> return modifier because the caller receives its own value.</p>
+<h2 id="console-output">Console Output</h2>
+<p>Console output is provided through <code>io.conout</code>.</p>
+<pre><code class="lang-text">io.conout(<span class="hljs-string">"Hello, world!"</span>)<span class="hljs-comment">;</span>
+</code></pre>
+<p>Values can also be printed:</p>
+<pre><code class="lang-text">let const <span class="hljs-keyword">string</span> <span class="hljs-keyword">message</span> = <span class="hljs-string">"hello"</span>;
+
+io.conout(<span class="hljs-keyword">message</span>);
+</code></pre>
+<h2 id="imports">Imports</h2>
+<p>External modules or libraries are included using <code>include()</code>.</p>
+<pre><code class="lang-text">include(<span class="hljs-string">"math"</span>)<span class="hljs-comment">;</span>
+</code></pre>
+<p>Unlike C&#39;s preprocessor-based <code>#include</code>, <code>include()</code> is part of the language syntax itself.</p>
+<h2 id="error-handling">Error Handling</h2>
+<p>Errors can be handled using <code>try</code>, <code>catch</code>, and <code>finally</code>.</p>
+<p>A <code>try</code> block does not require a <code>catch</code> or <code>finally</code>:</p>
+<pre><code class="lang-text">try{
+    something_that_might_fail()<span class="hljs-comment">;</span>
+}<span class="hljs-comment">;</span>
+</code></pre>
+<p>If the operation fails and there is no <code>catch</code> or <code>finally</code>, the failure is silently ignored.</p>
+<p>A <code>catch</code> block can handle the failure:</p>
+<pre><code class="lang-text"><span class="hljs-keyword">try</span>{
+    something_that_might_fail();
+}<span class="hljs-keyword">catch</span>(<span class="hljs-keyword">error</span>){
+    io.conout(<span class="hljs-keyword">error</span>);
+};
+</code></pre>
+<p>A <code>finally</code> block runs after the <code>try</code> operation regardless of whether it succeeds or fails:</p>
+<pre><code class="lang-text">try{
+    something_that_might_fail()<span class="hljs-comment">;</span>
+}finally{
+    cleanup()<span class="hljs-comment">;</span>
+}<span class="hljs-comment">;</span>
+</code></pre>
+<p>Both can be used together:</p>
+<pre><code class="lang-text"><span class="hljs-keyword">try</span>{
+    something_that_might_fail();
+}<span class="hljs-keyword">catch</span>(<span class="hljs-keyword">error</span>){
+    io.conout(<span class="hljs-keyword">error</span>);
+}<span class="hljs-keyword">finally</span>{
+    cleanup();
+};
+</code></pre>
+<h2 id="design-philosophy">Design Philosophy</h2>
+<p>The language is intentionally explicit.</p>
+<p>Mutability must be declared:</p>
+<pre><code class="lang-text"><span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">10</span>;
+</code></pre>
+<p>Assignment is explicit:</p>
+<pre><code class="lang-text"><span class="hljs-keyword">set</span> x <span class="hljs-comment">= 20</span>;
+</code></pre>
+<p>Type inference must be requested:</p>
+<pre><code class="lang-text"><span class="hljs-keyword">let</span> mut <span class="hljs-built_in">auto</span> x = <span class="hljs-number">10</span>;
+</code></pre>
+<p>Functions have explicit return types:</p>
+<pre><code class="lang-text"><span class="hljs-function">fn <span class="hljs-keyword">int</span> <span class="hljs-title">foo</span><span class="hljs-params">()</span></span>{
+    <span class="hljs-keyword">return</span>(<span class="hljs-number">10</span>);
+};
+</code></pre>
+<p>The syntax is deliberately familiar to programmers coming from C-family languages, while avoiding some of C&#39;s historical baggage.</p>
+<p>In short:</p>
+<p>C, but more pedantic and with significantly fewer ghosts from 1972.</p>
