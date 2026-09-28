@@ -33,7 +33,7 @@ std::pair<std::filesystem::path,std::filesystem::path> parseArgs(int argc,char* 
             exit(0);
         }
         if(std::string_view(argv[i])=="-V"||std::string_view(argv[i])=="--version"){
-            cout<<"Compiler version: 0.1.4\n";
+            cout<<"Compiler version: 0.1.6\n";
             exit(0);
         }
         if(std::string_view(argv[i])=="-v"||std::string_view(argv[i])=="--verbose"){
@@ -100,10 +100,10 @@ std::string resolve_imports(std::string input,const std::filesystem::path& sourc
         if(verbose){cout<<"Importing namespace: "<<import_namespace<<"\n";}
         std::filesystem::path import_file_path=std::filesystem::current_path();
         for(const auto& dir:{source_dir,assets_dir}){
-            import_file_path=dir/(import_namespace+".xmpl");
             if(std::filesystem::exists(import_file_path)){
                 break;
             }
+            import_file_path=dir/(import_namespace+".xmpl");
         }
         if(!std::filesystem::exists(import_file_path)){
             std::cerr<<"Could not find import file for namespace: "<<import_namespace<<"\n";
@@ -139,6 +139,9 @@ int main(int argc,char* argv[]){
         std::cerr<<"Could not create temporary file: "<<tmpfile<<"\n";
         exit(1);
     }
-    
+    // parse xmpl here
+    tmpfile_stream.close();
+    std::system(("g++ -std=c++17 -O2 -o "+output.string()+" "+tmpfile.string()).c_str());
+    std::filesystem::remove(tmpfile);
     if(verbose){cout<<input_file_content<<"\n";}
 }
