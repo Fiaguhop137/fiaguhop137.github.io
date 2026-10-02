@@ -1,180 +1,514 @@
-<h1 id="language-documentation">Language Documentation</h1>
-<p>A statically typed, C-style programming language designed around explicit declarations, predictable syntax, and minimal historical baggage.</p>
-<h2 id="variables">Variables</h2>
-<p>Variables are declared using <code>let</code>. Every declaration must explicitly specify whether the variable is mutable or constant.</p>
-<pre><code class="lang-text"><span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">10</span>;
-<span class="hljs-keyword">let</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> y = <span class="hljs-number">20</span>;
-</code></pre>
-<p>Mutable variables can be reassigned with <code>set</code>:</p>
-<pre><code class="lang-text"><span class="hljs-attribute">let mut int x</span> = 10;
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Language Documentation</title>
+        <style>
+            body{
+                font-family:system-ui, sans-serif;
+                max-width:1000px;
+                margin:0 auto;
+                padding:2rem;
+                line-height:1.6;
+            }
+            h1,h2,h3{
+                line-height:1.2;
+            }
+            pre{
+                padding:1rem;
+                overflow-x:auto;
+                background:#f0f0f0;
+                border-radius:6px;
+            }
+            code{
+                font-family:monospace;
+            }
+            nav{
+                padding:1rem;
+                margin-bottom:2rem;
+                border:1px solid #ccc;
+                border-radius:6px;
+            }
+            nav ul{
+                margin-bottom:0;
+            }
+            table{
+                border-collapse:collapse;
+                width:100%;
+            }
+            th,td{
+                border:1px solid #ccc;
+                padding:0.5rem;
+                text-align:left;
+            }
+            th{
+                background:#f0f0f0;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>Language Documentation</h1>
+            <p>
+                A strongly typed, explicit, general-purpose programming language
+                designed around readable syntax and direct control over storage access.
+            </p>
+        </header>
+        <nav>
+            <strong>Contents</strong>
+            <ul>
+                <li><a href="#philosophy">Design Philosophy</a></li>
+                <li><a href="#programs">Program Structure</a></li>
+                <li><a href="#variables">Variables</a></li>
+                <li><a href="#get-set">Storage Access</a></li>
+                <li><a href="#types">Types</a></li>
+                <li><a href="#functions">Functions</a></li>
+                <li><a href="#conditionals">Conditionals</a></li>
+                <li><a href="#loops">Loops</a></li>
+                <li><a href="#vectors">Vectors</a></li>
+                <li><a href="#exceptions">Exception Handling</a></li>
+                <li><a href="#operators">Operators</a></li>
+                <li><a href="#standard-library">Standard Library</a></li>
+                <li><a href="#complete-example">Complete Example</a></li>
+            </ul>
+        </nav>
+        <main>
+        <section id="philosophy">
+            <h2>Design Philosophy</h2>
+            <p>The language is designed to sit between high-level and low-levelprogramming.</p>
+            <p>Memory allocation and lifetime management are handled by the language, but the programmer is expected to understand the distinction between storage and the value stored in that storage. </p>
+            <p>The language favors explicit syntax over implicit behavior. Types, mutability, value access, assignment, function return types, and function parameters are all visible in the source code. </p>
+            <p>The language is intentionally verbose when that verbosity communicates useful information. </p>
+        </section>
+        <section id="programs">
+            <h2>Program Structure</h2>
+            <p>A program consists of declarations and statements. Functions are declared using the <code>fn</code> keyword. </p>
+            <pre><code>fn int main(){<br/>    io.conout("Hello, world!");<br/>    return(0);<br/>};</code></pre>
+            <p><code>main</code> is the entry point of the program. </p>
+            <p>Compound constructs such as functions, conditionals, loops, and exception handlers are terminated with a semicolon after their closing brace. </p>
+        </section>
+        <section id="variables">
+            <h2>Variables</h2>
+            <p>Variables are declared with <code>let</code>, followed by their mutability, type, name, and optional initial value. </p>
+            <pre><code>let mut int x=10;<br/>let const string y="hello";</code></pre>
+            <h3>Mutable variables</h3>
+            <p>A variable declared with <code>mut</code> may be modified after declaration. </p>
+            <pre><code>let mut int score=100;<br/>set score=get(score)+10;</code></pre>
+            <h3>Constant variables</h3>
+            <p>A variable declared with <code>const</code> cannot be modified through that binding. </p>
+            <pre><code>let const string name="Alice";</code></pre>
+            <p>Constant may be shadowed by a new declaration with the same name to reassign, although this is generally discouraged in favor of using a mutable variable to start with. </p>
+            <pre><code>let const string name="Alice";<br/>io.conout(get(name));<br/>let const string name="Bob";<br/>io.conout(get(name));</code></pre>
+            <h3>Shadowing</h3>
+            <p>A declaration may shadow another declaration with the same name. Shadowing may also change the type associated with that name. </p>
+            <pre><code>let const int x=10;<br/>io.conout(get(x));<br/>let const string x="hello";<br/>io.conout(get(x));</code></pre>
+            <p>This prints:</p>
+            <pre><code>10<br/>hello</code></pre>
+        </section>
+        <section id="get-set">
+            <h2>Storage Access</h2>
+        <p>
+            Variables represent storage. The <code>get</code> operation retrieves
+            the value stored there.
+        </p>
 
-<span class="hljs-attribute">set x</span> = 12;
-</code></pre>
-<p>Reassignment does not change the variable&#39;s type:</p>
-<pre><code class="lang-text">let mut int x = <span class="hljs-number">10</span>;
+        <pre><code>let const int x=10;
 
-<span class="hljs-keyword">set</span> x <span class="hljs-comment">= 12</span>;       <span class="hljs-comment">// valid</span>
-<span class="hljs-keyword">set</span> x <span class="hljs-comment">=</span> <span class="hljs-comment">"hello"</span>;  <span class="hljs-comment">// invalid</span>
-</code></pre>
-<p>A declaration without a mutability modifier is invalid:</p>
-<pre><code class="lang-text"><span class="hljs-keyword">let</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">10</span>; <span class="hljs-comment">// invalid</span>
-</code></pre>
-<p>The language does not assume mutability or immutability. The programmer must explicitly choose.</p>
-<h2 id="shadowing">Shadowing</h2>
-<p>Variables may shadow existing variables, including variables with the same name and in the same scope.</p>
-<pre><code class="lang-text"><span class="hljs-keyword">let</span> mut <span class="hljs-keyword">int</span> x = <span class="hljs-number">10</span>;
 
-<span class="hljs-keyword">let</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">20</span>;
+        io.conout(get(x));</code></pre>
 
-<span class="hljs-keyword">set</span> x = <span class="hljs-number">30</span>; <span class="hljs-comment">// invalid</span>
-</code></pre>
-<p>The second <code>x</code> shadows the first <code>x</code>. The active <code>x</code> is therefore the constant.</p>
-<p>The language does not restrict what can be shadowed. Yes, this means you can do things that make future-you question your life choices.</p>
-<h2 id="type-inference">Type Inference</h2>
-<p>Type inference is explicitly requested using <code>auto</code>.</p>
-<pre><code class="lang-text"><span class="hljs-keyword">let</span> mut <span class="hljs-built_in">auto</span> x = <span class="hljs-number">5</span>;
-<span class="hljs-keyword">let</span> <span class="hljs-keyword">const</span> <span class="hljs-built_in">auto</span> name = <span class="hljs-string">"hello"</span>;
-</code></pre>
-<p><code>auto</code> determines the type from the value provided during initialization.</p>
-<p>Explicit types remain available:</p>
-<pre><code class="lang-text"><span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">5</span>;
-</code></pre>
-<p>This distinction allows programmers to choose between explicit typing and inference.</p>
-<h2 id="assignment">Assignment</h2>
-<p>Variables are modified using <code>set</code>.</p>
-<pre><code class="lang-text"><span class="hljs-keyword">set</span> x <span class="hljs-comment">= 15</span>;
-</code></pre>
-<p>A constant cannot be modified:</p>
-<pre><code class="lang-text"><span class="hljs-keyword">let</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">10</span>;
 
-<span class="hljs-keyword">set</span> x = <span class="hljs-number">15</span>; <span class="hljs-comment">// invalid</span>
-</code></pre>
-<h2 id="conditionals">Conditionals</h2>
-<p>Conditional statements use C-style blocks.</p>
-<pre><code class="lang-text"><span class="hljs-keyword">if</span>(condition){
-    <span class="hljs-built_in">io</span>.conout(<span class="hljs-string">"true"</span>);
-}<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(other_condition){
-    <span class="hljs-built_in">io</span>.conout(<span class="hljs-string">"other"</span>);
-}<span class="hljs-keyword">else</span>{
-    <span class="hljs-built_in">io</span>.conout(<span class="hljs-string">"false"</span>);
-};
-</code></pre>
-<p>The semicolon terminates the entire conditional chain.</p>
-<p>An <code>if</code> without an <code>else</code> is terminated directly:</p>
-<pre><code class="lang-text">if(condition){
-    io.conout(<span class="hljs-string">"true"</span>)<span class="hljs-comment">;</span>
-}<span class="hljs-comment">;</span>
-</code></pre>
-<p>When an <code>else</code> follows, the semicolon belongs after the complete chain.</p>
-<h2 id="loops">Loops</h2>
-<p><code>while</code> loops repeatedly execute while their condition is true.</p>
-<pre><code class="lang-text">while(condition){
-    io.conout(<span class="hljs-string">"running"</span>)<span class="hljs-comment">;</span>
-}<span class="hljs-comment">;</span>
-</code></pre>
-<p><code>for</code> loops iterate over a collection.</p>
-<pre><code class="lang-text"><span class="hljs-keyword">for</span>(<span class="hljs-built_in">item</span>) <span class="hljs-keyword">in</span>(items){
-    io.conout(<span class="hljs-built_in">item</span>);
-};
-</code></pre>
-<p>Here, <code>item</code> represents the current element and <code>items</code> represents the collection being iterated over.</p>
-<h2 id="functions">Functions</h2>
-<p>Functions are declared using <code>fn</code>.</p>
-<pre><code class="lang-text"><span class="hljs-function">fn <span class="hljs-keyword">int</span> <span class="hljs-title">foo</span><span class="hljs-params">()</span></span>{
-    <span class="hljs-keyword">return</span>(<span class="hljs-number">10</span>);
-};
-</code></pre>
-<p>The return type appears before the function name.</p>
-<p>Functions are constant by default, so there is no need to specify <code>const</code> on the function itself.</p>
-<p>Function parameters use normal variable declarations:</p>
-<pre><code class="lang-text"><span class="hljs-function">fn <span class="hljs-keyword">int</span> <span class="hljs-title">foo</span><span class="hljs-params">(let <span class="hljs-keyword">const</span> <span class="hljs-keyword">auto</span> bar)</span></span>{
-    <span class="hljs-keyword">return</span>(<span class="hljs-number">1</span>);
-};
-</code></pre>
-<p>Multiple parameter types are supported:</p>
-<pre><code class="lang-text"><span class="hljs-function">fn <span class="hljs-keyword">int</span> <span class="hljs-title">add</span>(<span class="hljs-params"><span class="hljs-keyword">let</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> a, <span class="hljs-keyword">let</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> b</span>)</span>{
-    <span class="hljs-keyword">return</span>(a + b);
-};
-</code></pre>
-<p>The <code>auto</code> type allows a parameter to accept values whose type is determined dynamically:</p>
-<pre><code class="lang-text"><span class="hljs-function"><span class="hljs-keyword">fn</span> int foo<span class="hljs-params">(<span class="hljs-keyword">let</span> const auto <span class="hljs-built_in">bar</span>)</span>{
-    <span class="hljs-keyword">return</span><span class="hljs-params">(<span class="hljs-built_in">bar</span> + <span class="hljs-number">1</span>)</span></span>;
-};
-</code></pre>
-<p>Operations performed on an <code>auto</code> value may fail if the supplied value does not support that operation.</p>
-<p>For example, passing a string to the function above would cause the addition operation to fail.</p>
-<h2 id="return-values">Return Values</h2>
-<p>Functions return values using <code>return</code>.</p>
-<pre><code class="lang-text"><span class="hljs-function">fn <span class="hljs-keyword">string</span> <span class="hljs-title">cat_floofiness</span>(<span class="hljs-params"><span class="hljs-keyword">let</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">bool</span> fluffy</span>)</span>{
-    <span class="hljs-keyword">if</span>(fluffy){
-        <span class="hljs-keyword">return</span>(<span class="hljs-string">"verily"</span>);
-    }<span class="hljs-keyword">else</span>{
-        <span class="hljs-keyword">return</span>(<span class="hljs-string">"sadly not"</span>);
-    };
-};
-</code></pre>
-<p>Function return values are ordinary values. A function does not need a <code>mut</code> return modifier because the caller receives its own value.</p>
-<h2 id="console-output">Console Output</h2>
-<p>Console output is provided through <code>io.conout</code>.</p>
-<pre><code class="lang-text">io.conout(<span class="hljs-string">"Hello, world!"</span>)<span class="hljs-comment">;</span>
-</code></pre>
-<p>Values can also be printed:</p>
-<pre><code class="lang-text">let const <span class="hljs-keyword">string</span> <span class="hljs-keyword">message</span> = <span class="hljs-string">"hello"</span>;
+        <p>
+            Assignment is performed using <code>set</code>.
+        </p>
 
-io.conout(<span class="hljs-keyword">message</span>);
-</code></pre>
-<h2 id="imports">Imports</h2>
-<p>External modules or libraries are included using <code>include()</code>.</p>
-<pre><code class="lang-text">include(<span class="hljs-string">"math"</span>)<span class="hljs-comment">;</span>
-</code></pre>
-<p>Unlike C&#39;s preprocessor-based <code>#include</code>, <code>include()</code> is part of the language syntax itself.</p>
-<h2 id="error-handling">Error Handling</h2>
-<p>Errors can be handled using <code>try</code>, <code>catch</code>, and <code>finally</code>.</p>
-<p>A <code>try</code> block does not require a <code>catch</code> or <code>finally</code>:</p>
-<pre><code class="lang-text">try{
-    something_that_might_fail()<span class="hljs-comment">;</span>
-}<span class="hljs-comment">;</span>
-</code></pre>
-<p>If the operation fails and there is no <code>catch</code> or <code>finally</code>, the failure is silently ignored.</p>
-<p>A <code>catch</code> block can handle the failure:</p>
-<pre><code class="lang-text"><span class="hljs-keyword">try</span>{
-    something_that_might_fail();
-}<span class="hljs-keyword">catch</span>(<span class="hljs-keyword">error</span>){
-    io.conout(<span class="hljs-keyword">error</span>);
-};
-</code></pre>
-<p>A <code>finally</code> block runs after the <code>try</code> operation regardless of whether it succeeds or fails:</p>
-<pre><code class="lang-text">try{
-    something_that_might_fail()<span class="hljs-comment">;</span>
-}finally{
-    cleanup()<span class="hljs-comment">;</span>
-}<span class="hljs-comment">;</span>
-</code></pre>
-<p>Both can be used together:</p>
-<pre><code class="lang-text"><span class="hljs-keyword">try</span>{
-    something_that_might_fail();
-}<span class="hljs-keyword">catch</span>(<span class="hljs-keyword">error</span>){
-    io.conout(<span class="hljs-keyword">error</span>);
-}<span class="hljs-keyword">finally</span>{
-    cleanup();
-};
-</code></pre>
-<h2 id="design-philosophy">Design Philosophy</h2>
-<p>The language is intentionally explicit.</p>
-<p>Mutability must be declared:</p>
-<pre><code class="lang-text"><span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> <span class="hljs-keyword">int</span> x = <span class="hljs-number">10</span>;
-</code></pre>
-<p>Assignment is explicit:</p>
-<pre><code class="lang-text"><span class="hljs-keyword">set</span> x <span class="hljs-comment">= 20</span>;
-</code></pre>
-<p>Type inference must be requested:</p>
-<pre><code class="lang-text"><span class="hljs-keyword">let</span> mut <span class="hljs-built_in">auto</span> x = <span class="hljs-number">10</span>;
-</code></pre>
-<p>Functions have explicit return types:</p>
-<pre><code class="lang-text"><span class="hljs-function">fn <span class="hljs-keyword">int</span> <span class="hljs-title">foo</span><span class="hljs-params">()</span></span>{
-    <span class="hljs-keyword">return</span>(<span class="hljs-number">10</span>);
-};
-</code></pre>
-<p>The syntax is deliberately familiar to programmers coming from C-family languages, while avoiding some of C&#39;s historical baggage.</p>
-<p>In short:</p>
-<p>C, but more pedantic and with significantly fewer ghosts from 1972.</p>
+        <pre><code>let mut int x=10;
+
+
+        set x=get(x)+5;</code></pre>
+
+
+        <p>
+            The distinction between a variable and its stored value is an
+            intentional part of the language.
+        </p>
+
+
+        </section>
+
+        <section id="types">
+            <h2>Types</h2>
+
+
+        <p>
+            The language is strongly typed. Types are written explicitly in
+            declarations and function signatures.
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Example</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>int</code></td>
+                    <td><code>let const int x=10;</code></td>
+                </tr>
+                <tr>
+                    <td><code>string</code></td>
+                    <td><code>let const string name="Alice";</code></td>
+                </tr>
+                <tr>
+                    <td><code>bool</code></td>
+                    <td><code>let const bool happy=true;</code></td>
+                </tr>
+                <tr>
+                    <td><code>vector[T]</code></td>
+                    <td><code>let const vector[int] numbers=[1,2,3];</code></td>
+                </tr>
+                <tr>
+                    <td><code>error</code></td>
+                    <td><code>catch(let const error error){...}</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+
+        </section>
+
+        <section id="functions">
+            <h2>Functions</h2>
+
+
+        <p>
+            Functions use the following general form:
+        </p>
+
+        <pre><code>fn &lt;return type&gt; &lt;name&gt;(&lt;parameters&gt;){
+        &lt;statements&gt;
+
+
+        };</code></pre>
+
+
+        <p>
+            Parameters use the same declaration syntax as local variables.
+        </p>
+
+        <pre><code>fn int add(let const int a,let const int b){
+        return(get(a)+get(b));
+
+
+        };</code></pre>
+
+
+        <p>
+            Functions return values with <code>return</code>.
+        </p>
+
+        <pre><code>return(get(a)+get(b));</code></pre>
+
+        <h3>Function calls</h3>
+
+        <pre><code>let const int x=10;
+
+
+        let const int y=20;
+
+        let const int result=add(x,y);</code></pre>
+
+        </section>
+
+        <section id="conditionals">
+            <h2>Conditionals</h2>
+
+
+        <p>
+            Conditional execution uses <code>if</code>, <code>else if</code>,
+            and <code>else</code>.
+        </p>
+
+        <pre><code>if(get(temperature)&gt;80){
+        io.conout("hot");
+
+
+        }else if(get(temperature)<40){
+        io.conout("cold");
+        }else{
+        io.conout("comfortable");
+        };</code></pre>
+
+        </section>
+
+        <section id="loops">
+            <h2>Loops</h2>
+
+
+        <h3>While</h3>
+
+        <pre><code>let mut int count=1;
+
+
+        while(get(count)<=5){
+        io.conout(get(count));
+        set count=get(count)+1;
+        };</code></pre>
+
+
+        <h3>For-in</h3>
+
+        <p>
+            A <code>for</code> loop iterates over a value using
+            <code>in</code>.
+        </p>
+
+        <pre><code>for(let mut int number) in(get(numbers)){
+        io.conout(get(number));
+
+
+        };</code></pre>
+
+
+        <h3>Range</h3>
+
+        <p>
+            <code>range(start,end)</code> produces a sequence beginning at
+            <code>start</code> and ending before <code>end</code>.
+        </p>
+
+        <pre><code>range(2,6)</code></pre>
+
+        <p>
+            produces:
+        </p>
+
+        <pre><code>2
+
+
+        3
+        4
+        5</code></pre>
+
+        </section>
+
+        <section id="vectors">
+            <h2>Vectors</h2>
+
+
+        <p>
+            Vectors contain multiple values of a specified type.
+        </p>
+
+        <pre><code>let const vector[int] numbers=[1,2,3,4,5];</code></pre>
+
+        <p>
+            Vector types can be nested.
+        </p>
+
+        <pre><code>vector[vector[int]]</code></pre>
+
+        <p>
+            Vectors can be iterated with a <code>for-in</code> loop.
+        </p>
+
+        <pre><code>for(let mut int number) in(get(numbers)){
+        io.conout(get(number));
+
+
+        };</code></pre>
+
+        </section>
+
+        <section id="exceptions">
+            <h2>Exception Handling</h2>
+
+
+        <p>
+            Exceptions are handled with <code>try</code>, <code>catch</code>, and
+            <code>finally</code>.
+        </p>
+
+        <pre><code>try{
+        do_something_risky();
+
+
+        }catch(let const error error){
+        io.conerr("Something went wrong:");
+        io.conerr(get(error));
+        }finally{
+        io.conout("Finished.");
+        };</code></pre>
+
+
+        <p>
+            The caught error is represented as a typed, constant binding.
+        </p>
+
+        <p>
+            The <code>finally</code> block executes after the <code>try</code>
+            operation regardless of whether an exception was caught.
+        </p>
+
+
+        </section>
+
+        <section id="operators">
+            <h2>Operators</h2>
+
+
+        <p>
+            Arithmetic operators operate on compatible numeric values.
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Operator</th>
+                    <th>Meaning</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>+</code></td>
+                    <td>Addition</td>
+                </tr>
+                <tr>
+                    <td><code>-</code></td>
+                    <td>Subtraction</td>
+                </tr>
+                <tr>
+                    <td><code>*</code></td>
+                    <td>Multiplication</td>
+                </tr>
+                <tr>
+                    <td><code>&gt;</code></td>
+                    <td>Greater than</td>
+                </tr>
+                <tr>
+                    <td><code>&lt;</code></td>
+                    <td>Less than</td>
+                </tr>
+                <tr>
+                    <td><code>&lt;=</code></td>
+                    <td>Less than or equal to</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+        </section>
+
+        <section id="standard-library">
+            <h2>Standard Library</h2>
+
+
+        <h3>Console output</h3>
+
+        <p>
+            Normal console output uses <code>io.conout</code>.
+        </p>
+
+        <pre><code>io.conout("Hello, world!");</code></pre>
+
+        <h3>Console error output</h3>
+
+        <p>
+            Error output uses <code>io.conerr</code>.
+        </p>
+
+        <pre><code>io.conerr("Something went wrong.");</code></pre>
+
+        <h3>String conversion</h3>
+
+        <p>
+            Values can be converted to strings with <code>str</code>.
+        </p>
+
+        <pre><code>str(get(age))</code></pre>
+
+        <h3>String joining</h3>
+
+        <p>
+            Strings can be combined using <code>join</code>.
+        </p>
+
+        <pre><code>"".join([
+        get(name),
+        ", age ",
+        str(get(age))
+
+
+        ])</code></pre>
+
+
+        <h3>Ranges</h3>
+
+        <p>
+            <code>range(start,end)</code> creates an iterable sequence with an
+            exclusive upper bound.
+        </p>
+
+
+        </section>
+
+        <section id="complete-example">
+            <h2>Complete Example</h2>
+
+
+        <p>
+            The following program demonstrates functions, variables, vectors,
+            iteration, arithmetic, and console output.
+        </p>
+
+        <pre><code>fn int factorial(let const int n){
+        let mut int result=1;
+
+        for(let mut int iterator) in(range(2,get(n)+1)){
+            set result=get(result)*get(iterator);
+        };
+
+        return(result);
+
+
+        };
+
+        fn int main(){
+        let const int number=5;
+        let const int result=factorial(number);
+
+
+        io.conout("Factorial:");
+        io.conout(get(result));
+
+        return(0);
+
+
+        };</code></pre>
+
+
+        <p>
+            Output:
+        </p>
+
+        <pre><code>Factorial:
+
+
+        120</code></pre>
+
+        </section>
+
+        </main>
+
+        <footer>
+            <hr>
+            <p>
+                This document describes the language features currently defined by
+                the language specification.
+            </p>
+        </footer>
+    </body>
+</html>
