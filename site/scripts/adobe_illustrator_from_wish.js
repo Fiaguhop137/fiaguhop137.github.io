@@ -18,8 +18,8 @@ const tools=`
 `;
 const shapes=`
 <button data-tool="shape-rectangle">Rectangle</button>
-<button data-tool="shape-circle">Circle</button>
 <button data-tool="shape-ellipse">Ellipse</button>
+<button data-tool="shape-compass">Compass</button>
 <button data-tool="shape-polygon">Polygon</button>
 <button data-tool="shape-line">Line</button>
 <button data-tool="shape-star4">Star(4-point)</button>
@@ -34,6 +34,7 @@ const fileoptions=`
 let current_tool="tool-select";
 let current_color="#000000";
 let size=[480,360];
+let shiftKeyPressed=false;
 const da_box=document.getElementById("da_box");
 da_box.innerHTML=`
     <div id="editor">
@@ -73,9 +74,21 @@ function get_svg_point(event){
     point.y=event.clientY;
     return point.matrixTransform(canvas.getScreenCTM().inverse());
 }
+function shape_is_empty(shape){
+    switch(shape.localName){
+        case "rect":
+            return shape.width.baseVal.value===0||shape.height.baseVal.value===0;
+        case "circle":
+            return shape.r.baseVal.value===0;
+        case "ellipse":
+            return shape.rx.baseVal.value===0||shape.ry.baseVal.value===0;
+        default:
+            return false;
+    }
+}
 function stop_drawing(event){
     if(!drawing){return;}
-    if(current_shape.width.baseVal.value===0||current_shape.height.baseVal.value===0){canvas.removeChild(current_shape);}
+    if(shape_is_empty(current_shape)){canvas.removeChild(current_shape);}
     drawing=false;
     start_point=null;
     current_shape=null;
@@ -91,6 +104,12 @@ function select_element(element){
     const mid_x=x+width/2;
     const mid_y=y+height/2;
     overlay.innerHTML=`<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="none" stroke="#5af" stroke-width="1"/><circle cx="${mid_x}" cy="${y}" r="1.5" fill="#5af"/><circle cx="${mid_x}" cy="${y+height}" r="1.5" fill="#5af"/><circle cx="${x}" cy="${mid_y}" r="1.5" fill="#5af"/><circle cx="${x+width}" cy="${mid_y}" r="1.5" fill="#5af"/><circle cx="${x}" cy="${y}" r="1.5" fill="#5af"/><circle cx="${x+width}" cy="${y}" r="1.5" fill="#5af"/><circle cx="${x}" cy="${y+height}" r="1.5" fill="#5af"/><circle cx="${x+width}" cy="${y+height}" r="1.5" fill="#5af"/><line x1="${mid_x-1.5}" y1="${mid_y-1.5}" x2="${mid_x+1.5}" y2="${mid_y+1.5}" stroke="#5af" stroke-width="1.5" stroke-linecap="round"/><line x1="${mid_x-1.5}" y1="${mid_y+1.5}" x2="${mid_x+1.5}" y2="${mid_y-1.5}" stroke="#5af" stroke-width="1.5" stroke-linecap="round"/>`
+    let outline=selected_element.cloneNode(true);
+    outline.setAttribute("fill","none");
+    outline.setAttribute("stroke","#5af");
+    outline.setAttribute("stroke-width","1.5");
+    outline.setAttribute("pointer-events","none");
+    overlay.appendChild(outline);
 }
 function deselect_element(){
     overlay.innerHTML="";
@@ -123,6 +142,66 @@ async function save_svg(svg){
         URL.revokeObjectURL(url);
     }
 }
+document.addEventListener("keydown",(event)=>{
+    if(event.key==="Escape"){
+        if(drawing){stop_drawing(event);}
+        deselect_element();
+    }else if(event.key==="Delete"||event.key==="Backspace"){
+        if(selected_element){
+            canvas.removeChild(selected_element);
+            deselect_element();
+        }
+    }else if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(event.key)){
+        if(selected_element){
+            let moveAmount=10;
+            if(event.shiftKey){moveAmount=1;}
+            if(selected_element.localName==="rect"){
+                const dx=event.key==="ArrowRight"?moveAmount:event.key==="ArrowLeft"?-moveAmount:0;
+                const dy=event.key==="ArrowDown"?moveAmount:event.key==="ArrowUp"?-moveAmount:0;
+                const x=parseFloat(selected_element.getAttribute("x")||"0");
+                const y=parseFloat(selected_element.getAttribute("y")||"0");
+                selected_element.setAttribute("x",x+dx);
+                selected_element.setAttribute("y",y+dy);
+            }else if(selected_element.localName==="circle"||selected_element.localName==="ellipse"){
+                const dx=event.key==="ArrowRight"?moveAmount:event.key==="ArrowLeft"?-moveAmount:0;
+                const dy=event.key==="ArrowDown"?moveAmount:event.key==="ArrowUp"?-moveAmount:0;
+                const cx=parseFloat(selected_element.getAttribute("cx")||"0");
+                const cy=parseFloat(selected_element.getAttribute("cy")||"0");
+                selected_element.setAttribute("cx",cx+dx);
+                selected_element.setAttribute("cy",cy+dy);
+            }else if(selected_element.localName==="line"){
+                const dx=event.key==="ArrowRight"?moveAmount:event.key==="ArrowLeft"?-moveAmount:0;
+                const dy=event.key==="ArrowDown"?moveAmount:event.key==="ArrowUp"?-moveAmount:0;
+                const x1=parseFloat(selected_element.getAttribute("x1")||"0");
+                const y1=parseFloat(selected_element.getAttribute("y1")||"0");
+                const x2=parseFloat(selected_element.getAttribute("x2")||"0");
+                const y2=parseFloat(selected_element.getAttribute("y2")||"0");
+                selected_element.setAttribute("x1",x1+dx);
+                selected_element.setAttribute("y1",y1+dy);
+                selected_element.setAttribute("x2",x2+dx);
+                selected_element.setAttribute("y2",y2+dy);
+            }else{
+                const dx=event.key==="ArrowRight"?moveAmount:event.key==="ArrowLeft"?-moveAmount:0;
+                const dy=event.key==="ArrowDown"?moveAmount:event.key==="ArrowUp"?-moveAmount:0;
+                const transform=selected_element.getAttribute("transform")||"";
+                const translateMatch=transform.match(/translate\(([-\d.]+),([-\d.]+)\)/);
+                let currentX=0;
+                let currentY=0;
+                if(translateMatch){
+                    currentX=parseFloat(translateMatch[1]);
+                    currentY=parseFloat(translateMatch[2]);
+                }
+                const newX=currentX+dx;
+                const newY=currentY+dy;
+                const newTransform=transform.replace(/translate\(([-\d.]+),([-\d.]+)\)/,`translate(${newX},${newY})`);
+                selected_element.setAttribute("transform",newTransform);
+            }
+            select_element(selected_element);
+        }
+    }else if(event.shiftKey){
+        shiftKeyPressed=true;
+    }
+});
 canvas.addEventListener("pointerdown",(event)=>{
     if(current_tool==="tool-select"){
         if(event.target===canvas){
@@ -135,50 +214,105 @@ canvas.addEventListener("pointerdown",(event)=>{
         translating=true;
         start_point=get_svg_point(event);
         canvas.setPointerCapture(event.pointerId);
-    }else if(current_tool==="shape-rectangle"){
+    }else{
         drawing=true;
         start_point=get_svg_point(event);
-        current_shape=document.createElementNS("http://www.w3.org/2000/svg","rect");
-        current_shape.setAttribute("x",start_point.x);
-        current_shape.setAttribute("y",start_point.y);
-        current_shape.setAttribute("width",0);
-        current_shape.setAttribute("height",0);
-        current_shape.setAttribute("fill",current_color);
-        canvas.appendChild(current_shape);
-        canvas.setPointerCapture(event.pointerId);
-    }else{
-        return;
+        if(current_tool==="shape-rectangle"){
+            current_shape=document.createElementNS("http://www.w3.org/2000/svg","rect");
+            current_shape.setAttribute("x",start_point.x);
+            current_shape.setAttribute("y",start_point.y);
+            current_shape.setAttribute("width",0);
+            current_shape.setAttribute("height",0);
+            current_shape.setAttribute("fill",current_color);
+            canvas.appendChild(current_shape);
+            canvas.setPointerCapture(event.pointerId);
+        }else if(current_tool==="shape-compass"){
+            current_shape=document.createElementNS("http://www.w3.org/2000/svg","circle");
+            current_shape.setAttribute("cx",start_point.x);
+            current_shape.setAttribute("cy",start_point.y);
+            current_shape.setAttribute("r",0);
+            current_shape.setAttribute("fill",current_color);
+            canvas.appendChild(current_shape);
+            canvas.setPointerCapture(event.pointerId);
+        }else if(current_tool==="shape-ellipse"){
+            current_shape=document.createElementNS("http://www.w3.org/2000/svg","ellipse");
+            current_shape.setAttribute("cx",start_point.x);
+            current_shape.setAttribute("cy",start_point.y);
+            current_shape.setAttribute("rx",0);
+            current_shape.setAttribute("ry",0);
+            current_shape.setAttribute("fill",current_color);
+            canvas.appendChild(current_shape);
+            canvas.setPointerCapture(event.pointerId);
+        }
     }
 });
 canvas.addEventListener("pointermove",(event)=>{
     const point=get_svg_point(event);
     if(drawing&&current_shape){
-        const x=Math.min(start_point.x,point.x);
-        const y=Math.min(start_point.y,point.y);
-        const width=Math.abs(point.x-start_point.x);
-        const height=Math.abs(point.y-start_point.y);
-        current_shape.setAttribute("x",x);
-        current_shape.setAttribute("y",y);
-        current_shape.setAttribute("width",width);
-        current_shape.setAttribute("height",height);
+        if(current_shape.localName==="rect"){
+            const x=Math.min(start_point.x,point.x);
+            const y=Math.min(start_point.y,point.y);
+            const width=Math.abs(point.x-start_point.x);
+            const height=Math.abs(point.y-start_point.y);
+            current_shape.setAttribute("x",x);
+            current_shape.setAttribute("y",y);
+            current_shape.setAttribute("width",width);
+            current_shape.setAttribute("height",height);
+        }else if(current_shape.localName==="circle"){
+            const dx=point.x-start_point.x;
+            const dy=point.y-start_point.y;
+            const radius=Math.sqrt(dx*dx+dy*dy);
+            current_shape.setAttribute("r",radius);
+        }else if(current_shape.localName==="ellipse"){
+            const x=Math.min(start_point.x,point.x);
+            const y=Math.min(start_point.y,point.y);
+            const width=Math.abs(point.x-start_point.x);
+            const height=Math.abs(point.y-start_point.y);
+            current_shape.setAttribute("cx",x+width/2);
+            current_shape.setAttribute("cy",y+height/2);
+            current_shape.setAttribute("rx",width/2);
+            current_shape.setAttribute("ry",height/2);
+        }
     }else if(translating&&selected_element){
         const dx=point.x-start_point.x;
         const dy=point.y-start_point.y;
         const box=selected_element.getBBox();
-        selected_element.setAttribute("x",box.x+dx);
-        selected_element.setAttribute("y",box.y+dy);
+        if(selected_element.localName==="rect"||selected_element.localName==="image"||selected_element.localName==="text"){
+            selected_element.setAttribute("x",box.x+dx);
+            selected_element.setAttribute("y",box.y+dy);
+        }else if(selected_element.localName==="circle"||selected_element.localName==="ellipse"){
+            selected_element.setAttribute("cx",box.x+box.width/2+dx);
+            selected_element.setAttribute("cy",box.y+box.height/2+dy);
+        }else if(selected_element.localName==="line"){
+            const x1=parseFloat(selected_element.getAttribute("x1"))+dx;
+            selected_element.setAttribute("x1",x1);
+            const y1=parseFloat(selected_element.getAttribute("y1"))+dy;
+            selected_element.setAttribute("y1",y1);
+            const x2=parseFloat(selected_element.getAttribute("x2"))+dx;
+            selected_element.setAttribute("x2",x2);
+            const y2=parseFloat(selected_element.getAttribute("y2"))+dy;
+            selected_element.setAttribute("y2",y2);
+        }else{
+            selected_element.setAttribute("transform",`translate(${dx},${dy})`);
+        }
         start_point=point;
         select_element(selected_element);
     }
 });
 canvas.addEventListener("pointerup",(event)=>{
-    translating=false;
-    stop_drawing(event);
-    if(canvas.hasPointerCapture(event.pointerId)){
-        canvas.releasePointerCapture(event.pointerId);
+    if(drawing){stop_drawing(event);}
+    if(translating){
+        translating=false;
+        start_point=null;
     }
+    if(canvas.hasPointerCapture(event.pointerId)){canvas.releasePointerCapture(event.pointerId);}
 });
-canvas.addEventListener("pointercancel",(event)=>{stop_drawing(event);});
+canvas.addEventListener("pointercancel",(event)=>{
+    if(drawing){stop_drawing(event);}
+    translating=false;
+    start_point=null;
+    if(canvas.hasPointerCapture(event.pointerId)){canvas.releasePointerCapture(event.pointerId);}
+});
 toolbar.addEventListener("click",async (event)=>{
     const tool=event.target.dataset.tool;
     switch(tool){
@@ -219,8 +353,8 @@ toolbar.addEventListener("click",async (event)=>{
             deselect_element();
             break;
         case "file-resize":
-            const newWidth=parseInt(prompt("Enter new width:",size[0]));
-            const newHeight=parseInt(prompt("Enter new height:",size[1]));
+            const newWidth=parseFloat(prompt("Enter new width:",size[0]));
+            const newHeight=parseFloat(prompt("Enter new height:",size[1]));
             if(Number.isFinite(newWidth)&&Number.isFinite(newHeight)&&newWidth>0&&newHeight>0){
                 size=[newWidth,newHeight];
                 canvas.setAttribute("width",size[0]);

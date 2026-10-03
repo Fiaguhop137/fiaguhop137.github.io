@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <iframe src="../pages/header.html" style="width:100%;height:30px;overflow:hidden;border:none"></iframe>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Language Documentation</title>
+        <title>Yttria Language Documentation</title>
         <style>
             body{
                 font-family:system-ui, sans-serif;
@@ -51,7 +51,7 @@
     <body>
         <header>
             <hr/>
-            <h1>Language Documentation</h1>
+            <h1>Yttria Language Documentation</h1>
             <p>A strongly typed, explicit, general-purpose programming language designed around readable syntax and direct control over storage access. </p>
             <p>Yes I used AI to write this for me cuz my lazy ass couldn't be bothered to write a whole ass essay</p>
         </header>
@@ -83,8 +83,8 @@
             </section>
             <section id="programs">
                 <h2>Program Structure</h2>
-                <p>A program consists of declarations and statements. Functions are declared using the <code>fn</code> keyword. </p>
-                <pre><code>fn int main(){<br/>    io.console.output("Hello, world!");<br/>    return(0);<br/>};</code></pre>
+                <p>A program consists of declarations and statements. Functions are declared using the <code>fun</code> keyword. </p>
+                <pre><code>fun int main(){<br/>    io.console.output("Hello, world!");<br/>    return(0);<br/>};</code></pre>
                 <p><code>main</code> is the entry point of the program. </p>
                 <p>Compound constructs such as functions, conditionals, loops, and exception handlers are terminated with a semicolon after their closing brace. </p>
                 <p>Comments are denoted by two forward slashes (//) and extend to the end of the line. They can also be denoted with /* */ for multi-line comments.</p>
@@ -149,9 +149,9 @@
             <section id="functions">
                 <h2>Functions</h2>
                 <p>Functions use the following general form: </p>
-                <pre><code>fn &lt;return type&gt; &lt;name&gt;(&lt;parameters&gt;){<br/>    &lt;statements&gt;<br/>};</code></pre>
+                <pre><code>fun &lt;return type&gt; &lt;name&gt;(&lt;parameters&gt;){<br/>    &lt;statements&gt;<br/>};</code></pre>
                 <p>Parameters use the same declaration syntax as local variables. </p>
-                <pre><code>fn int add(let const int a,let const int b){<br/>    return(get(a)+get(b));<br/>};</code></pre>
+                <pre><code>fun int add(let const int a,let const int b){<br/>    return(get(a)+get(b));<br/>};</code></pre>
                 <p>Functions return values with <code>return</code>.</p>
                 <pre><code>return(get(a)+get(b));</code></pre>
                 <h3>Function calls</h3>
@@ -163,6 +163,8 @@
                 <h2>Conditionals</h2>
                 <p>Conditional execution uses <code>if</code>, <code>else if</code>, and <code>else</code>. </p>
                 <pre><code>if(get(temperature)&gt;80){<br/>    io.console.output("hot");<br/>}else if(get(temperature)&lt;40){<br/>    io.console.output("cold");<br/>}else{<br/>    io.console.output("comfortable");<br/>};</code></pre>
+                <p>Switch statements can also be used for more complex conditional logic.</p>
+                <pre><code>switch(get(temperature)){<br/>    case(80){<br/>        io.console.output("hot");<br/>    }case(40){<br/>        io.console.output("cold");<br/>    }default{<br/>        io.console.output("comfortable");<br/>    };<br/>};</code></pre>
             </section>
             <section id="loops">
                 <h2>Loops</h2>
@@ -274,7 +276,7 @@
             <section id="complete-example">
                 <h2>Complete Example</h2>
                 <p>The following program demonstrates functions, variables, vectors, iteration, arithmetic, and console output. </p>
-                <pre><code>fn int factorial(let const int n){<br/>    let mut int result=1;<br/>    for(let const int iterator) in(range(2,get(n)+1)){<br/>        set result=get(result)*get(iterator);<br/>    };<br/>    return(result);<br/>};<br/>fn int main(){<br/>    let const int number=5;<br/>    let const int result=factorial(number);<br/>    io.console.output("Factorial: ");<br/>    io.console.output(get(result));<br/>    return(0);<br/>};</code></pre>
+                <pre><code>fun int factorial(let const int n){<br/>    let mut int result=1;<br/>    for(let const int iterator) in(range(2,get(n)+1)){<br/>        set result=get(result)*get(iterator);<br/>    };<br/>    return(get(result));<br/>};<br/>fun int main(){<br/>    let const int number=5;<br/>    let const int result=factorial(number);<br/>    io.console.output("Factorial: ");<br/>    io.console.output(get(result));<br/>    return(0);<br/>};</code></pre>
                 <p>Output: </p>
                 <pre><code>Factorial: 120</code></pre>
             </section>
