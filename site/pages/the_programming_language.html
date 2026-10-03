@@ -13,7 +13,7 @@
                 padding:2rem;
                 line-height:1.6;
             }
-            h1,h2,h3{
+            h1,h2,h3,h4{
                 line-height:1.2;
             }
             pre{
@@ -50,9 +50,10 @@
     </head>
     <body>
         <header>
+            <hr/>
             <h1>Language Documentation</h1>
             <p>A strongly typed, explicit, general-purpose programming language designed around readable syntax and direct control over storage access. </p>
-            <p>Yes I used ChatGPT to write this for me cuz my lazy ass couldn't be bothered to write a whole ass essay</p>
+            <p>Yes I used AI to write this for me cuz my lazy ass couldn't be bothered to write a whole ass essay</p>
         </header>
         <nav>
             <strong>Contents</strong>
@@ -73,441 +74,214 @@
             </ul>
         </nav>
         <main>
-        <section id="philosophy">
-            <h2>Design Philosophy</h2>
-            <p>The language is designed to sit between high-level and low-levelprogramming.</p>
-            <p>Memory allocation and lifetime management are handled by the language, but the programmer is expected to understand the distinction between storage and the value stored in that storage. </p>
-            <p>The language favors explicit syntax over implicit behavior. Types, mutability, value access, assignment, function return types, and function parameters are all visible in the source code. </p>
-            <p>The language is intentionally verbose when that verbosity communicates useful information. </p>
-        </section>
-        <section id="programs">
-            <h2>Program Structure</h2>
-            <p>A program consists of declarations and statements. Functions are declared using the <code>fn</code> keyword. </p>
-            <pre><code>fn int main(){<br/>    io.conout("Hello, world!");<br/>    return(0);<br/>};</code></pre>
-            <p><code>main</code> is the entry point of the program. </p>
-            <p>Compound constructs such as functions, conditionals, loops, and exception handlers are terminated with a semicolon after their closing brace. </p>
-        </section>
-        <section id="variables">
-            <h2>Variables</h2>
-            <p>Variables are declared with <code>let</code>, followed by their mutability, type, name, and optional initial value. </p>
-            <pre><code>let mut int x=10;<br/>let const string y="hello";</code></pre>
-            <h3>Mutable variables</h3>
-            <p>A variable declared with <code>mut</code> may be modified after declaration. </p>
-            <pre><code>let mut int score=100;<br/>set score=get(score)+10;</code></pre>
-            <h3>Constant variables</h3>
-            <p>A variable declared with <code>const</code> cannot be modified through that binding. </p>
-            <pre><code>let const string name="Alice";</code></pre>
-            <p>Constant may be shadowed by a new declaration with the same name to reassign, although this is generally discouraged in favor of using a mutable variable to start with. </p>
-            <pre><code>let const string name="Alice";<br/>io.conout(get(name));<br/>let const string name="Bob";<br/>io.conout(get(name));</code></pre>
-            <h3>Shadowing</h3>
-            <p>A declaration may shadow another declaration with the same name. Shadowing may also change the type associated with that name. </p>
-            <pre><code>let const int x=10;<br/>io.conout(get(x));<br/>let const string x="hello";<br/>io.conout(get(x));</code></pre>
-            <p>This prints:</p>
-            <pre><code>10<br/>hello</code></pre>
-        </section>
-        <section id="get-set">
-            <h2>Storage Access</h2>
-        <p>
-            Variables represent storage. The <code>get</code> operation retrieves
-            the value stored there.
-        </p>
-
-        <pre><code>let const int x=10;
-
-
-        io.conout(get(x));</code></pre>
-
-
-        <p>
-            Assignment is performed using <code>set</code>.
-        </p>
-
-        <pre><code>let mut int x=10;
-
-
-        set x=get(x)+5;</code></pre>
-
-
-        <p>
-            The distinction between a variable and its stored value is an
-            intentional part of the language.
-        </p>
-
-
-        </section>
-
-        <section id="types">
-            <h2>Types</h2>
-
-
-        <p>
-            The language is strongly typed. Types are written explicitly in
-            declarations and function signatures.
-        </p>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Example</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>int</code></td>
-                    <td><code>let const int x=10;</code></td>
-                </tr>
-                <tr>
-                    <td><code>string</code></td>
-                    <td><code>let const string name="Alice";</code></td>
-                </tr>
-                <tr>
-                    <td><code>bool</code></td>
-                    <td><code>let const bool happy=true;</code></td>
-                </tr>
-                <tr>
-                    <td><code>vector[T]</code></td>
-                    <td><code>let const vector[int] numbers=[1,2,3];</code></td>
-                </tr>
-                <tr>
-                    <td><code>error</code></td>
-                    <td><code>catch(let const error error){...}</code></td>
-                </tr>
-            </tbody>
-        </table>
-
-
-        </section>
-
-        <section id="functions">
-            <h2>Functions</h2>
-
-
-        <p>
-            Functions use the following general form:
-        </p>
-
-        <pre><code>fn &lt;return type&gt; &lt;name&gt;(&lt;parameters&gt;){
-        &lt;statements&gt;
-
-
-        };</code></pre>
-
-
-        <p>
-            Parameters use the same declaration syntax as local variables.
-        </p>
-
-        <pre><code>fn int add(let const int a,let const int b){
-        return(get(a)+get(b));
-
-
-        };</code></pre>
-
-
-        <p>
-            Functions return values with <code>return</code>.
-        </p>
-
-        <pre><code>return(get(a)+get(b));</code></pre>
-
-        <h3>Function calls</h3>
-
-        <pre><code>let const int x=10;
-
-
-        let const int y=20;
-
-        let const int result=add(x,y);</code></pre>
-
-        </section>
-
-        <section id="conditionals">
-            <h2>Conditionals</h2>
-
-
-        <p>
-            Conditional execution uses <code>if</code>, <code>else if</code>,
-            and <code>else</code>.
-        </p>
-
-        <pre><code>if(get(temperature)&gt;80){
-        io.conout("hot");
-
-
-        }else if(get(temperature)<40){
-        io.conout("cold");
-        }else{
-        io.conout("comfortable");
-        };</code></pre>
-
-        </section>
-
-        <section id="loops">
-            <h2>Loops</h2>
-
-
-        <h3>While</h3>
-
-        <pre><code>let mut int count=1;
-
-
-        while(get(count)<=5){
-        io.conout(get(count));
-        set count=get(count)+1;
-        };</code></pre>
-
-
-        <h3>For-in</h3>
-
-        <p>
-            A <code>for</code> loop iterates over a value using
-            <code>in</code>.
-        </p>
-
-        <pre><code>for(let mut int number) in(get(numbers)){
-        io.conout(get(number));
-
-
-        };</code></pre>
-
-
-        <h3>Range</h3>
-
-        <p>
-            <code>range(start,end)</code> produces a sequence beginning at
-            <code>start</code> and ending before <code>end</code>.
-        </p>
-
-        <pre><code>range(2,6)</code></pre>
-
-        <p>
-            produces:
-        </p>
-
-        <pre><code>2
-
-
-        3
-        4
-        5</code></pre>
-
-        </section>
-
-        <section id="vectors">
-            <h2>Vectors</h2>
-
-
-        <p>
-            Vectors contain multiple values of a specified type.
-        </p>
-
-        <pre><code>let const vector[int] numbers=[1,2,3,4,5];</code></pre>
-
-        <p>
-            Vector types can be nested.
-        </p>
-
-        <pre><code>vector[vector[int]]</code></pre>
-
-        <p>
-            Vectors can be iterated with a <code>for-in</code> loop.
-        </p>
-
-        <pre><code>for(let mut int number) in(get(numbers)){
-        io.conout(get(number));
-
-
-        };</code></pre>
-
-        </section>
-
-        <section id="exceptions">
-            <h2>Exception Handling</h2>
-
-
-        <p>
-            Exceptions are handled with <code>try</code>, <code>catch</code>, and
-            <code>finally</code>.
-        </p>
-
-        <pre><code>try{
-        do_something_risky();
-
-
-        }catch(let const error error){
-        io.conerr("Something went wrong:");
-        io.conerr(get(error));
-        }finally{
-        io.conout("Finished.");
-        };</code></pre>
-
-
-        <p>
-            The caught error is represented as a typed, constant binding.
-        </p>
-
-        <p>
-            The <code>finally</code> block executes after the <code>try</code>
-            operation regardless of whether an exception was caught.
-        </p>
-
-
-        </section>
-
-        <section id="operators">
-            <h2>Operators</h2>
-
-
-        <p>
-            Arithmetic operators operate on compatible numeric values.
-        </p>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Operator</th>
-                    <th>Meaning</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>+</code></td>
-                    <td>Addition</td>
-                </tr>
-                <tr>
-                    <td><code>-</code></td>
-                    <td>Subtraction</td>
-                </tr>
-                <tr>
-                    <td><code>*</code></td>
-                    <td>Multiplication</td>
-                </tr>
-                <tr>
-                    <td><code>&gt;</code></td>
-                    <td>Greater than</td>
-                </tr>
-                <tr>
-                    <td><code>&lt;</code></td>
-                    <td>Less than</td>
-                </tr>
-                <tr>
-                    <td><code>&lt;=</code></td>
-                    <td>Less than or equal to</td>
-                </tr>
-            </tbody>
-        </table>
-
-
-        </section>
-
-        <section id="standard-library">
-            <h2>Standard Library</h2>
-
-
-        <h3>Console output</h3>
-
-        <p>
-            Normal console output uses <code>io.conout</code>.
-        </p>
-
-        <pre><code>io.conout("Hello, world!");</code></pre>
-
-        <h3>Console error output</h3>
-
-        <p>
-            Error output uses <code>io.conerr</code>.
-        </p>
-
-        <pre><code>io.conerr("Something went wrong.");</code></pre>
-
-        <h3>String conversion</h3>
-
-        <p>
-            Values can be converted to strings with <code>str</code>.
-        </p>
-
-        <pre><code>str(get(age))</code></pre>
-
-        <h3>String joining</h3>
-
-        <p>
-            Strings can be combined using <code>join</code>.
-        </p>
-
-        <pre><code>"".join([
-        get(name),
-        ", age ",
-        str(get(age))
-
-
-        ])</code></pre>
-
-
-        <h3>Ranges</h3>
-
-        <p>
-            <code>range(start,end)</code> creates an iterable sequence with an
-            exclusive upper bound.
-        </p>
-
-
-        </section>
-
-        <section id="complete-example">
-            <h2>Complete Example</h2>
-
-
-        <p>
-            The following program demonstrates functions, variables, vectors,
-            iteration, arithmetic, and console output.
-        </p>
-
-        <pre><code>fn int factorial(let const int n){
-        let mut int result=1;
-
-        for(let mut int iterator) in(range(2,get(n)+1)){
-            set result=get(result)*get(iterator);
-        };
-
-        return(result);
-
-
-        };
-
-        fn int main(){
-        let const int number=5;
-        let const int result=factorial(number);
-
-
-        io.conout("Factorial:");
-        io.conout(get(result));
-
-        return(0);
-
-
-        };</code></pre>
-
-
-        <p>
-            Output:
-        </p>
-
-        <pre><code>Factorial:
-
-
-        120</code></pre>
-
-        </section>
-
+            <section id="philosophy">
+                <h2>Design Philosophy</h2>
+                <p>The language is designed to sit between high-level and low-level programming.</p>
+                <p>Memory allocation and lifetime management are handled by the language, but the programmer is expected to understand the distinction between storage and the value stored in that storage. </p>
+                <p>The language favors explicit syntax over implicit behavior. Types, mutability, value access, assignment, function return types, and function parameters are all visible in the source code. </p>
+                <p>The language is intentionally verbose when that verbosity communicates useful information. </p>
+            </section>
+            <section id="programs">
+                <h2>Program Structure</h2>
+                <p>A program consists of declarations and statements. Functions are declared using the <code>fn</code> keyword. </p>
+                <pre><code>fn int main(){<br/>    io.console.output("Hello, world!");<br/>    return(0);<br/>};</code></pre>
+                <p><code>main</code> is the entry point of the program. </p>
+                <p>Compound constructs such as functions, conditionals, loops, and exception handlers are terminated with a semicolon after their closing brace. </p>
+                <p>Comments are denoted by two forward slashes (//) and extend to the end of the line. They can also be denoted with /* */ for multi-line comments.</p>
+            </section>
+            <section id="variables">
+                <h2>Variables</h2>
+                <p>Variables are declared with <code>let</code>, followed by their mutability, type, name, and optional initial value. </p>
+                <pre><code>let mut int x=10;<br/>let const string y="hello";</code></pre>
+                <h3>Mutable variables</h3>
+                <p>A variable declared with <code>mut</code> may be modified after declaration. </p>
+                <pre><code>let mut int score=100;<br/>set score=get(score)+10;</code></pre>
+                <h3>Constant variables</h3>
+                <p>A variable declared with <code>const</code> cannot be modified through that binding. </p>
+                <pre><code>let const string name="Alice";</code></pre>
+                <p>A constant binding cannot be modified after declaration. A new declaration may shadow it with the same name, creating a separate binding, although this is generally discouraged in favor of using a mutable variable to start with. </p>
+                <pre><code>let const string name="Alice";<br/>io.console.output(get(name));<br/>let const string name="Bob";<br/>io.console.output(get(name));</code></pre>
+                <h3>Shadowing</h3>
+                <p>A declaration may shadow another declaration with the same name. Shadowing may also change the type associated with that name. </p>
+                <pre><code>let const int x=10;<br/>io.console.output(get(x));<br/>let const string x="hello";<br/>io.console.output(get(x));</code></pre>
+                <p>This prints:</p>
+                <pre><code>10<br/>hello</code></pre>
+            </section>
+            <section id="get-set">
+                <h2>Storage Access</h2>
+                <p>Variables represent storage. The <code>get</code> operation retrieves the value stored there. </p>
+                <p>A variable expression refers to its storage location. The <code>get</code> operation retrieves the value stored at that location, leaving it out returns a pointer to the storage location, which is usually undesirable behavior. </p>
+                <pre><code>let const int x=10;<br/>io.console.output(get(x)); // Prints 10<br/>io.console.output(x); // Prints the pointer(e.g., 0x7fff5fbff6d0)</code></pre>
+                <p>Assignment is performed using <code>set</code>.</p>
+                <pre><code>let mut int x=10;<br/>set x=get(x)+5;</code></pre>
+                <p>The distinction between a variable and its stored value is an intentional part of the language. </p>
+            </section>
+            <section id="types">
+                <h2>Types</h2>
+                <p>The language is strongly typed. Types are written explicitly in declarations and function signatures. </p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>int</code></td>
+                            <td><code>let const int x=10;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>string</code></td>
+                            <td><code>let const string name="Alice";</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>bool</code></td>
+                            <td><code>let const bool happy=true;</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>vector[T]</code></td>
+                            <td><code>let const vector[int] numbers=[1,2,3];</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section id="functions">
+                <h2>Functions</h2>
+                <p>Functions use the following general form: </p>
+                <pre><code>fn &lt;return type&gt; &lt;name&gt;(&lt;parameters&gt;){<br/>    &lt;statements&gt;<br/>};</code></pre>
+                <p>Parameters use the same declaration syntax as local variables. </p>
+                <pre><code>fn int add(let const int a,let const int b){<br/>    return(get(a)+get(b));<br/>};</code></pre>
+                <p>Functions return values with <code>return</code>.</p>
+                <pre><code>return(get(a)+get(b));</code></pre>
+                <h3>Function calls</h3>
+                <p>Functions are called by name with arguments in parentheses. </p>
+                <p>For example:</p>
+                <pre><code>let const int x=10;<br/>let const int y=20;<br/>let const int result=add(x,y);</code></pre>
+            </section>
+            <section id="conditionals">
+                <h2>Conditionals</h2>
+                <p>Conditional execution uses <code>if</code>, <code>else if</code>, and <code>else</code>. </p>
+                <pre><code>if(get(temperature)&gt;80){<br/>    io.console.output("hot");<br/>}else if(get(temperature)&lt;40){<br/>    io.console.output("cold");<br/>}else{<br/>    io.console.output("comfortable");<br/>};</code></pre>
+            </section>
+            <section id="loops">
+                <h2>Loops</h2>
+                <h3>While</h3>
+                <p>A <code>while</code> loop executes a block of code repeatedly while a condition is true. </p>
+                <pre><code>let mut int count=1;<br/>while(get(count)<=5){<br/>    io.console.output(get(count));<br/>    set count=get(count)+1;<br/>};</code></pre>
+                <h3>For-in</h3>
+                <p>A <code>for</code> loop iterates over a value using <code>in</code>. </p>
+                <pre><code>for(let const int number) in(get(numbers)){<br/>    io.console.output(get(number));<br/>};</code></pre>
+            </section>
+            <section id="vectors">
+                <h2>Vectors</h2>
+                <p>Vectors contain multiple values of a specified type. </p>
+                <pre><code>let const vector[int] numbers=[1,2,3,4,5];</code></pre>
+                <p>Vector types can be nested. </p>
+                <pre><code>vector[vector[int]]</code></pre>
+                <p>Vectors can be iterated with a <code>for-in</code> loop. </p>
+                <pre><code>for(let const int number) in(get(numbers)){<br/>    io.console.output(get(number));<br/>};</code></pre>
+            </section>
+            <section id="exceptions">
+                <h2>Exception Handling</h2>
+                <p>Exceptions are handled with <code>try</code>, <code>catch</code>, and <code>finally</code>. </p>
+                <pre><code>try{<br/>    do_something_risky();<br/>}catch(let const string error){<br/>    io.console.error("Something went wrong:");<br/>    io.console.error(get(error));<br/>}finally{<br/>    io.console.output("Finished.");<br/>};</code></pre>
+                <p>The caught error is represented as a typed, constant binding. </p>
+                <p>The <code>finally</code> block executes after the <code>try</code> operation regardless of whether an exception was caught. </p>
+            </section>
+            <section id="operators">
+                <h2>Operators</h2>
+                <p>Arithmetic operators operate on compatible numeric values. </p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Operator</th>
+                            <th>Meaning</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>+</code></td>
+                            <td>Addition</td>
+                        </tr>
+                        <tr>
+                            <td><code>-</code></td>
+                            <td>Subtraction</td>
+                        </tr>
+                        <tr>
+                            <td><code>*</code></td>
+                            <td>Multiplication</td>
+                        </tr>
+                        <tr>
+                            <td><code>/</code></td>
+                            <td>Integer Division</td>
+                        </tr>
+                        <tr>
+                            <td><code>&gt;</code></td>
+                            <td>Greater than</td>
+                        </tr>
+                        <tr>
+                            <td><code>&lt;</code></td>
+                            <td>Less than</td>
+                        </tr>
+                        <tr>
+                            <td><code>&lt;=</code></td>
+                            <td>Less than or equal to</td>
+                        </tr>
+                        <tr>
+                            <td><code>&gt;=</code></td>
+                            <td>Greater than or equal to</td>
+                        </tr>
+                        <tr>
+                            <td><code>==</code></td>
+                            <td>Equal to</td>
+                        </tr>
+                        <tr>
+                            <td><code>!=</code></td>
+                            <td>Not equal to</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+            <section id="standard-library">
+                <h2>Standard Library</h2>
+                <h3>Console I/O</h3>
+                <p>Normal console output uses <code>io.console.output</code>. </p>
+                <pre><code>io.console.output("Hello, world!");</code></pre>
+                <p><code>io.console.output</code> writes its argument to standard output without automatically appending a newline. </p>
+                <h3>Console error output</h3>
+                <p>Error output uses <code>io.console.error</code>. </p>
+                <pre><code>io.console.error("Something went wrong.");</code></pre>
+                <p><code>io.console.error</code> writes its argument to standard error without automatically appending a newline. </p>
+                <h3>Console input</h3>
+                <p>Console input uses <code>io.console.input</code>. </p>
+                <pre><code>let const string name=io.console.input("Enter your name: ");</code></pre>
+                <p>This prompts the user for input and stores the result in a constant string variable. </p>
+                <h3>String conversion</h3>
+                <p>Values can be converted to strings with <code>str</code>. </p>
+                <pre><code>str(get(age))</code></pre>
+                <h3>String joining</h3>
+                <p>Strings can be combined using <code>join</code>. </p>
+                <pre><code>"".join([get(name),", age ",str(get(age))])</code></pre>
+                <p>All elements supplied to <code>join</code> must be strings.</p>
+                <h3>Range</h3>
+                <p><code>range(start,end)</code> produces a vector of integers beginning at <code>start</code> and ending before <code>end</code>. </p>
+                <pre><code>range(2,6)</code></pre>
+                <p>produces: </p>
+                <pre><code>2<br/>3<br/>4<br/>5</code></pre>
+                <p>Range includes the start value but excludes the end value. </p>
+            </section>
+            <section id="complete-example">
+                <h2>Complete Example</h2>
+                <p>The following program demonstrates functions, variables, vectors, iteration, arithmetic, and console output. </p>
+                <pre><code>fn int factorial(let const int n){<br/>    let mut int result=1;<br/>    for(let const int iterator) in(range(2,get(n)+1)){<br/>        set result=get(result)*get(iterator);<br/>    };<br/>    return(result);<br/>};<br/>fn int main(){<br/>    let const int number=5;<br/>    let const int result=factorial(number);<br/>    io.console.output("Factorial: ");<br/>    io.console.output(get(result));<br/>    return(0);<br/>};</code></pre>
+                <p>Output: </p>
+                <pre><code>Factorial: 120</code></pre>
+            </section>
         </main>
-
         <footer>
-            <hr>
-            <p>
-                This document describes the language features currently defined by
-                the language specification.
-            </p>
+            <hr/>
+            <p>This document describes the language features currently defined by the language specification. </p>
         </footer>
     </body>
 </html>

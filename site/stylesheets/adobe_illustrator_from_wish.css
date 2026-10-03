@@ -59,6 +59,7 @@ body{
     align-items:center;
     justify-content:center;
     background:#aaa;
+    position:relative;
 }
 #canvas {
     width:80%;
@@ -76,4 +77,13 @@ body{
     flex-shrink:0;
     background:#aaa;
     border-left:1px solid #aaa;
+}
+#canvas,
+#overlay{
+    position:absolute;
+    width:80%;
+    height:80%;
+}
+#overlay{
+    pointer-events:none;
 }

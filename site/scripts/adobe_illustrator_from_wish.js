@@ -1,3 +1,4 @@
+import {optimize} from 'https://cdn.jsdelivr.net/npm/svgo/+esm';
 const default_toolbar=`
 <div id="toolbar">
 <button data-tool="main-tools">Tools</button>
@@ -48,74 +49,60 @@ da_box.innerHTML=`
                     height="${size[1]}"
                     viewBox="0 0 ${size[0]} ${size[1]}">
                 </svg>
+                <svg id="overlay"
+                    width="${size[0]}"
+                    height="${size[1]}"
+                    viewBox="0 0 ${size[0]} ${size[1]}">
+                </svg>
             </main>
             <aside id="properties"></aside>
         </div>
     </div>
 `;
 const canvas=document.getElementById("canvas");
+const overlay=document.getElementById("overlay");
 const toolbar=document.getElementById("toolbar");
 let drawing=false;
 let start_point=null;
 let current_shape=null;
+let selected_element=null;
+let translating=false;
 function get_svg_point(event){
     const point=canvas.createSVGPoint();
     point.x=event.clientX;
     point.y=event.clientY;
     return point.matrixTransform(canvas.getScreenCTM().inverse());
 }
-canvas.addEventListener("pointerdown",(event)=>{
-    if(current_tool=="shape-rectangle"){
-        drawing=true;
-        start_point=get_svg_point(event);
-        current_shape=document.createElementNS("http://www.w3.org/2000/svg","rect");
-        current_shape.setAttribute("x",start_point.x);
-        current_shape.setAttribute("y",start_point.y);
-        current_shape.setAttribute("width",0);
-        current_shape.setAttribute("height",0);
-        current_shape.setAttribute("fill",current_color);
-        canvas.appendChild(current_shape);
-        canvas.setPointerCapture(event.pointerId);
-    }else{
-        return;
-    }
-});
-canvas.addEventListener("pointermove",(event)=>{
-    if(!drawing||!current_shape){
-        return;
-    }
-    const point=get_svg_point(event);
-    const x=Math.min(start_point.x,point.x);
-    const y=Math.min(start_point.y,point.y);
-    const width=Math.abs(point.x-start_point.x);
-    const height=Math.abs(point.y-start_point.y);
-    current_shape.setAttribute("x",x);
-    current_shape.setAttribute("y",y);
-    current_shape.setAttribute("width",width);
-    current_shape.setAttribute("height",height);
-});
-canvas.addEventListener("pointerup",(event)=>{
-    if(!drawing){
-        return;
-    }
+function stop_drawing(event){
+    if(!drawing){return;}
+    if(current_shape.width.baseVal.value===0||current_shape.height.baseVal.value===0){canvas.removeChild(current_shape);}
     drawing=false;
     start_point=null;
     current_shape=null;
-    canvas.releasePointerCapture(event.pointerId);
-});
+    if(canvas.hasPointerCapture(event.pointerId)){canvas.releasePointerCapture(event.pointerId);}
+}
+function select_element(element){
+    selected_element=element;
+    const box=element.getBBox();
+    const x=box.x;
+    const y=box.y;
+    const width=box.width;
+    const height=box.height;
+    const mid_x=x+width/2;
+    const mid_y=y+height/2;
+    overlay.innerHTML=`<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="none" stroke="#5af" stroke-width="1"/><circle cx="${mid_x}" cy="${y}" r="1.5" fill="#5af"/><circle cx="${mid_x}" cy="${y+height}" r="1.5" fill="#5af"/><circle cx="${x}" cy="${mid_y}" r="1.5" fill="#5af"/><circle cx="${x+width}" cy="${mid_y}" r="1.5" fill="#5af"/><circle cx="${x}" cy="${y}" r="1.5" fill="#5af"/><circle cx="${x+width}" cy="${y}" r="1.5" fill="#5af"/><circle cx="${x}" cy="${y+height}" r="1.5" fill="#5af"/><circle cx="${x+width}" cy="${y+height}" r="1.5" fill="#5af"/><line x1="${mid_x-1.5}" y1="${mid_y-1.5}" x2="${mid_x+1.5}" y2="${mid_y+1.5}" stroke="#5af" stroke-width="1.5" stroke-linecap="round"/><line x1="${mid_x-1.5}" y1="${mid_y+1.5}" x2="${mid_x+1.5}" y2="${mid_y-1.5}" stroke="#5af" stroke-width="1.5" stroke-linecap="round"/>`
+}
+function deselect_element(){
+    overlay.innerHTML="";
+    selected_element=null;
+}
 async function save_svg(svg){
-    const svgData=new XMLSerializer().serializeToString(svg);
+    const rawSvg=new XMLSerializer().serializeToString(svg);
+    const result=optimize(rawSvg,{multipass:true,plugins:['preset-default',{name:'cleanupNumericValues',params:{floatPrecision:3}}]});
+    const svgData=result.data;
     if("showSaveFilePicker" in window){
         try{
-            const handle=await window.showSaveFilePicker({
-                suggestedName:"my_drawing.svg",
-                types:[{
-                    description:"SVG Image",
-                    accept:{
-                        "image/svg+xml":[".svg"]
-                    }
-                }]
-            });
+            const handle=await window.showSaveFilePicker({suggestedName:"my_drawing.svg",types:[{description:"SVG Image",accept:{"image/svg+xml":[".svg"]}}]});
             const writable=await handle.createWritable();
             await writable.write(svgData);
             await writable.close();
@@ -136,6 +123,62 @@ async function save_svg(svg){
         URL.revokeObjectURL(url);
     }
 }
+canvas.addEventListener("pointerdown",(event)=>{
+    if(current_tool==="tool-select"){
+        if(event.target===canvas){
+            deselect_element();
+            return;
+        }
+        if(selected_element!==event.target){
+            select_element(event.target);
+        }
+        translating=true;
+        start_point=get_svg_point(event);
+        canvas.setPointerCapture(event.pointerId);
+    }else if(current_tool==="shape-rectangle"){
+        drawing=true;
+        start_point=get_svg_point(event);
+        current_shape=document.createElementNS("http://www.w3.org/2000/svg","rect");
+        current_shape.setAttribute("x",start_point.x);
+        current_shape.setAttribute("y",start_point.y);
+        current_shape.setAttribute("width",0);
+        current_shape.setAttribute("height",0);
+        current_shape.setAttribute("fill",current_color);
+        canvas.appendChild(current_shape);
+        canvas.setPointerCapture(event.pointerId);
+    }else{
+        return;
+    }
+});
+canvas.addEventListener("pointermove",(event)=>{
+    const point=get_svg_point(event);
+    if(drawing&&current_shape){
+        const x=Math.min(start_point.x,point.x);
+        const y=Math.min(start_point.y,point.y);
+        const width=Math.abs(point.x-start_point.x);
+        const height=Math.abs(point.y-start_point.y);
+        current_shape.setAttribute("x",x);
+        current_shape.setAttribute("y",y);
+        current_shape.setAttribute("width",width);
+        current_shape.setAttribute("height",height);
+    }else if(translating&&selected_element){
+        const dx=point.x-start_point.x;
+        const dy=point.y-start_point.y;
+        const box=selected_element.getBBox();
+        selected_element.setAttribute("x",box.x+dx);
+        selected_element.setAttribute("y",box.y+dy);
+        start_point=point;
+        select_element(selected_element);
+    }
+});
+canvas.addEventListener("pointerup",(event)=>{
+    translating=false;
+    stop_drawing(event);
+    if(canvas.hasPointerCapture(event.pointerId)){
+        canvas.releasePointerCapture(event.pointerId);
+    }
+});
+canvas.addEventListener("pointercancel",(event)=>{stop_drawing(event);});
 toolbar.addEventListener("click",async (event)=>{
     const tool=event.target.dataset.tool;
     switch(tool){
@@ -171,10 +214,9 @@ toolbar.addEventListener("click",async (event)=>{
             });
             break;
         case "file-new":
-            if(!confirm("This will clear the entire canvas. Okay to proceed?")){
-                break;
-            }
+            if(!confirm("This will clear the entire canvas. Okay to proceed?")){break;}
             canvas.innerHTML="";
+            deselect_element();
             break;
         case "file-resize":
             const newWidth=parseInt(prompt("Enter new width:",size[0]));
@@ -184,12 +226,13 @@ toolbar.addEventListener("click",async (event)=>{
                 canvas.setAttribute("width",size[0]);
                 canvas.setAttribute("height",size[1]);
                 canvas.setAttribute("viewBox",`0 0 ${size[0]} ${size[1]}`);
+                overlay.setAttribute("width",size[0]);
+                overlay.setAttribute("height",size[1]);
+                overlay.setAttribute("viewBox",`0 0 ${size[0]} ${size[1]}`);
             }
             break;
         case "file-open":
-            if(!confirm("This will clear the entire canvas. Okay to proceed?")){
-                break;
-            }
+            if(!confirm("This will clear the entire canvas. Okay to proceed?")){break;}
             const input=document.createElement("input");
             input.type="file";
             input.accept=".svg";
