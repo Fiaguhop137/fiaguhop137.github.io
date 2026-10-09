@@ -1,4 +1,96 @@
 import {optimize} from 'https://cdn.jsdelivr.net/npm/svgo/+esm';
+const style=document.createElement("style");
+style.textContent=`
+html,body{
+    width:100%;
+    height:100%;
+    margin:0;
+}
+body{
+    overflow:hidden;
+}
+#da_box{
+    width:100%;
+    height:100%;
+}
+#editor{
+    display:flex;
+    width:100%;
+    height:100%;
+}
+#sidebar_left{
+    width:180px;
+    height:100%;
+    flex-shrink:0;
+    box-sizing:border-box;
+    padding:10px;
+    background:#fff;
+    border-right:1px solid #aaa;
+}
+#toolbar{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+#toolbar button{
+    width:100%;
+    padding:10px;
+    box-sizing:border-box;
+    border:1px solid #bbb;
+    border-radius:4px;
+    background:#eee;
+    color:#000;
+    cursor:pointer;
+}
+#toolbar button:hover{
+    background: #ddd;
+}
+#toolbar button:active {
+    background: #ccc;
+}
+#workspace{
+    display:flex;
+    flex:1;
+    min-width:0;
+    min-height:0;
+}
+#canvas_container{
+    flex:1;
+    min-width:0;
+    min-height:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#aaa;
+    position:relative;
+}
+#canvas {
+    width:80%;
+    height:80%;
+    background:#fff;
+}
+#layers {
+    width: 180px;
+    flex-shrink:0;
+    background:#aaa;
+    border-right:1px solid #aaa;
+}
+#properties {
+    width:220px;
+    flex-shrink:0;
+    background:#aaa;
+    border-left:1px solid #aaa;
+}
+#canvas,
+#overlay{
+    position:absolute;
+    width:80%;
+    height:80%;
+}
+#overlay{
+    pointer-events:none;
+}`
+document.head.appendChild(style);
 const default_toolbar=`
 <div id="toolbar">
 <button data-tool="main-tools">T̲ools</button>
@@ -83,13 +175,20 @@ function shape_is_empty(shape){
             return false;
     }
 }
-function stop_drawing(event){
+function stop_drawing(event,cancel=false){
     if(!drawing){return;}
-    if(shape_is_empty(current_shape)){canvas.removeChild(current_shape);}
+    if(current_shape&&(cancel||shape_is_empty(current_shape))){canvas.removeChild(current_shape);}
     drawing=false;
     start_point=null;
     current_shape=null;
-    if(canvas.hasPointerCapture(event.pointerId)){canvas.releasePointerCapture(event.pointerId);}
+    if(event&&typeof event.pointerId==="number"&&canvas.hasPointerCapture(event.pointerId)){
+        canvas.releasePointerCapture(event.pointerId);
+    }
+}
+function translate_element(element,dx,dy){
+    const transform=element.getAttribute("transform")||"";
+    const translation=`translate(${dx},${dy})`;
+    element.setAttribute("transform",transform?`${translation} ${transform}`:translation);
 }
 function select_element(element){
     selected_element=element;
@@ -220,16 +319,23 @@ async function resolve_toolbar(tool){
                             return;
                         }
                         canvas.innerHTML=loadedSvg.innerHTML;
-                        if(loadedSvg.hasAttribute("width")){
-                            canvas.setAttribute("width",loadedSvg.getAttribute("width"));
-                        }
-                        if(loadedSvg.hasAttribute("height")){
-                            canvas.setAttribute("height",loadedSvg.getAttribute("height"));
-                        }
-                        if(loadedSvg.hasAttribute("viewBox")){
-                            canvas.setAttribute("viewBox",loadedSvg.getAttribute("viewBox"));
-                        }
-                        size=[parseFloat(canvas.getAttribute("width"))||480,parseFloat(canvas.getAttribute("height"))||360];
+                        const viewBox=loadedSvg.getAttribute("viewBox");
+                        const viewBoxValues=viewBox?.trim().split(/[\s,]+/).map(Number);
+                        const viewBoxWidth=viewBoxValues?.length===4&&Number.isFinite(viewBoxValues[2])?viewBoxValues[2]:null;
+                        const viewBoxHeight=viewBoxValues?.length===4&&Number.isFinite(viewBoxValues[3])?viewBoxValues[3]:null;
+                        const width=parseFloat(loadedSvg.getAttribute("width")||"");
+                        const height=parseFloat(loadedSvg.getAttribute("height")||"");
+                        size=[
+                            Number.isFinite(width)&&width>0?width:viewBoxWidth||480,
+                            Number.isFinite(height)&&height>0?height:viewBoxHeight||360
+                        ];
+                        canvas.setAttribute("width",loadedSvg.getAttribute("width")||size[0]);
+                        canvas.setAttribute("height",loadedSvg.getAttribute("height")||size[1]);
+                        canvas.setAttribute("viewBox",viewBox||`0 0 ${size[0]} ${size[1]}`);
+                        overlay.setAttribute("width",canvas.getAttribute("width"));
+                        overlay.setAttribute("height",canvas.getAttribute("height"));
+                        overlay.setAttribute("viewBox",canvas.getAttribute("viewBox"));
+                        deselect_element();
                     };
                     reader.readAsText(file);
                 }
@@ -246,7 +352,7 @@ async function resolve_toolbar(tool){
 };
 document.addEventListener("keydown",async (event)=>{
     if(event.key==="Escape"){
-        if(drawing){stop_drawing(event);}
+        if(drawing){stop_drawing(null,true);}
         deselect_element();
     }else if(event.key==="Delete"||event.key==="Backspace"){
         if(selected_element){
@@ -285,18 +391,7 @@ document.addEventListener("keydown",async (event)=>{
             }else{
                 const dx=event.key==="ArrowRight"?moveAmount:event.key==="ArrowLeft"?-moveAmount:0;
                 const dy=event.key==="ArrowDown"?moveAmount:event.key==="ArrowUp"?-moveAmount:0;
-                const transform=selected_element.getAttribute("transform")||"";
-                const translateMatch=transform.match(/translate\(([-\d.]+),([-\d.]+)\)/);
-                let currentX=0;
-                let currentY=0;
-                if(translateMatch){
-                    currentX=parseFloat(translateMatch[1]);
-                    currentY=parseFloat(translateMatch[2]);
-                }
-                const newX=currentX+dx;
-                const newY=currentY+dy;
-                const newTransform=transform.replace(/translate\(([-\d.]+),([-\d.]+)\)/,`translate(${newX},${newY})`);
-                selected_element.setAttribute("transform",newTransform);
+                translate_element(selected_element,dx,dy);
             }
             select_element(selected_element);
         }
@@ -483,7 +578,7 @@ canvas.addEventListener("pointermove",(event)=>{
             const y2=parseFloat(selected_element.getAttribute("y2"))+dy;
             selected_element.setAttribute("y2",y2);
         }else{
-            selected_element.setAttribute("transform",`translate(${dx},${dy})`);
+            translate_element(selected_element,dx,dy);
         }
         start_point=point;
         select_element(selected_element);
@@ -498,7 +593,7 @@ canvas.addEventListener("pointerup",(event)=>{
     if(canvas.hasPointerCapture(event.pointerId)){canvas.releasePointerCapture(event.pointerId);}
 });
 canvas.addEventListener("pointercancel",(event)=>{
-    if(drawing){stop_drawing(event);}
+    if(drawing){stop_drawing(event,true);}
     translating=false;
     start_point=null;
     if(canvas.hasPointerCapture(event.pointerId)){canvas.releasePointerCapture(event.pointerId);}
