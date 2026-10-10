@@ -44,30 +44,6 @@
             th{
                 background:#f0f0f0;
             }
-            .compiler-box{
-                margin-top:2rem;
-                padding:1rem;
-                border:1px solid #ccc;
-                border-radius:6px;
-            }
-            .compiler-box textarea{
-                display:block;
-                box-sizing:border-box;
-                width:100%;
-                min-height:12rem;
-                margin:1rem 0;
-                padding:0.75rem;
-                font-family:monospace;
-                resize:vertical;
-            }
-            .compiler-box input[type="file"]{
-                display:block;
-                margin-bottom:1rem;
-            }
-            .compiler-box button{
-                padding:0.5rem 1rem;
-                cursor:pointer;
-            }
         </style>
     </head>
     <body>
@@ -351,7 +327,13 @@
                 <h3>Console I/O</h3>
                 <p>Normal console output uses <code>io.console.output</code>. </p>
                 <pre><code>io.console.output("Hello, world!");</code></pre>
-                <p><code>io.console.output</code> writes its argument to standard output without automatically appending a newline. </p>
+                <p><code>io.console.output</code> appends its argument to the output buffer without automatically appending a newline. </p>
+                <h3>Flushing console output</h3>
+                <p><code>io.console.output</code> appends text to the output buffer. Use <code>io.console.flush</code> with one <code>char</code> argument to write the buffered output to the console, clear the buffer, and then write that character.</p>
+                <pre><code>io.console.output("Hello, ");
+io.console.output("world!");
+io.console.flush("\n");</code></pre>
+                <p>The example writes <code>Hello, world!</code>, appends a newline, and then empties the output buffer.</p>
                 <h3>Console error output</h3>
                 <p>Error output uses <code>io.console.error</code>. </p>
                 <pre><code>io.console.error("Something went wrong.");</code></pre>
@@ -381,15 +363,6 @@
                 <p>Output: </p>
                 <pre><code>Factorial: 120</code></pre>
             </section>
-            <section class="compiler-box" id="yttria-compiler">
-                <h2>Try Yttria</h2>
-                <label for="yttria-code-input">Yttria source code</label>
-                <textarea id="yttria-code-input" name="yttria-code" placeholder="Paste Yttria code here"></textarea>
-                <label for="yttria-file-input">Or upload a <code>.ytr</code> file</label>
-                <input id="yttria-file-input" name="yttria-file" type="file" accept=".ytr">
-                <button id="yttria-compile-button" type="button">Compile</button>
-            </section>
-            <script src="../scripts/yttria.js"></script>
         </main>
         <footer>
             <hr/>
