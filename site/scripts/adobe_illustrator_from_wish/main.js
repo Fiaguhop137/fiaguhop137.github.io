@@ -73,6 +73,7 @@ body{
     width:80%;
     height:80%;
     background:#fff;
+    touch-action:none;
 }
 #layers {
     width: 180px;
@@ -106,17 +107,17 @@ const default_toolbar=`
 const tools=`
 <button data-tool="tool-select">S͟elect</button>
 <button data-tool="tool-reshape">R͟eshape</button>
-<button data-tool="tool-vecna">V͟ector Node Tool</button>
+<button data-tool="tool-vecna">Ve̲ctor Node Tool</button>
 <button data-tool="tool-text">T͟ext</button>
 <button data-tool="tool-zoom">Z͟oom</button>
 <button data-tool="tool-fill">F͟ill</button>
-<button data-tool="tool-colorset">C͟olor Set</button>
+<button data-tool="tool-colorset">Co̲lor Set</button>
 <button data-tool="tool-colorpick">Color P͟icker</button>
 `;
 const shapes=`
 <button data-tool="shape-rectangle">R͟ectangle</button>
 <button data-tool="shape-ellipse">E̲llipse</button>
-<button data-tool="shape-compass">C̲ompass</button>
+<button data-tool="shape-compass">Co̲mpass</button>
 <button data-tool="shape-polygon">P̲olygon</button>
 <button data-tool="shape-line">L̲ine</button>
 `;
@@ -138,17 +139,8 @@ da_box.innerHTML=`
         <div id="workspace">
             <aside id="layers"></aside>
             <main id="canvas_container">
-                <svg id="canvas"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="${size[0]}"
-                    height="${size[1]}"
-                    viewBox="0 0 ${size[0]} ${size[1]}">
-                </svg>
-                <svg id="overlay"
-                    width="${size[0]}"
-                    height="${size[1]}"
-                    viewBox="0 0 ${size[0]} ${size[1]}">
-                </svg>
+                <svg id="canvas" xmlns="http://www.w3.org/2000/svg" width="${size[0]}" height="${size[1]}" viewBox="0 0 ${size[0]} ${size[1]}"></svg>
+                <svg id="overlay" width="${size[0]}" height="${size[1]}" viewBox="0 0 ${size[0]} ${size[1]}"></svg>
             </main>
             <aside id="properties"></aside>
         </div>
@@ -172,14 +164,35 @@ function select_element(element){
     utils.select_element(overlay,element);
 }
 function deselect_element(){
-    utils.deselect_element(overlay);
+    overlay.innerHTML="";
     selected_element=null;
     canvas.style.cursor="default";
 }
-function reset_interaction(event=null,cancelDrawing=false){
-    if(cancelDrawing&&current_shape?.parentNode===canvas){
-        canvas.removeChild(current_shape);
+function delete_selected_element(){
+    if(!selected_element){return;}
+    if(canvas.contains(selected_element)){selected_element.remove();}
+    deselect_element();
+}
+function move_selected_element(dx,dy){
+    if(!selected_element){return;}
+    if(selected_element.localName==="rect"){
+        selected_element.setAttribute("x",parseFloat(selected_element.getAttribute("x")||"0")+dx);
+        selected_element.setAttribute("y",parseFloat(selected_element.getAttribute("y")||"0")+dy);
+    }else if(selected_element.localName==="circle"||selected_element.localName==="ellipse"){
+        selected_element.setAttribute("cx",parseFloat(selected_element.getAttribute("cx")||"0")+dx);
+        selected_element.setAttribute("cy",parseFloat(selected_element.getAttribute("cy")||"0")+dy);
+    }else if(selected_element.localName==="line"){
+        selected_element.setAttribute("x1",parseFloat(selected_element.getAttribute("x1")||"0")+dx);
+        selected_element.setAttribute("y1",parseFloat(selected_element.getAttribute("y1")||"0")+dy);
+        selected_element.setAttribute("x2",parseFloat(selected_element.getAttribute("x2")||"0")+dx);
+        selected_element.setAttribute("y2",parseFloat(selected_element.getAttribute("y2")||"0")+dy);
+    }else{
+        utils.translate_element(selected_element,dx,dy);
     }
+    select_element(selected_element);
+}
+function reset_interaction(event=null,cancelDrawing=false){
+    if(cancelDrawing&&current_shape?.parentNode===canvas){canvas.removeChild(current_shape);}
     drawing=false;
     start_point=null;
     current_shape=null;
@@ -188,9 +201,7 @@ function reset_interaction(event=null,cancelDrawing=false){
     resize_handle=null;
     resize_box=null;
     resize_transform="";
-    if(active_pointer_id!==null&&canvas.hasPointerCapture(active_pointer_id)){
-        canvas.releasePointerCapture(active_pointer_id);
-    }
+    if(active_pointer_id!==null&&canvas.hasPointerCapture(active_pointer_id)){canvas.releasePointerCapture(active_pointer_id);}
     active_pointer_id=null;
     utils.set_resize_handles_visible(overlay,true);
     canvas.style.cursor="default";
@@ -202,23 +213,15 @@ function is_editable_target(target){
     );
 }
 function update_active_tool(){
-    toolbar.querySelectorAll("[data-tool]").forEach((button)=>{
-        button.classList.toggle("active",button.dataset.tool===current_tool);
-    });
+    toolbar.querySelectorAll("[data-tool]").forEach((button)=>{button.classList.toggle("active",button.dataset.tool===current_tool);});
 }
 function update_cursor(point,event){
-    if(!selected_element||resizing||translating){
-        return;
-    }
+    if(!selected_element||resizing||translating){return;}
     const box=selected_element.getBBox();
     const handle=utils.get_resize_handle(point,box);
-    if(handle){
-        canvas.style.cursor=utils.get_resize_cursor(handle);
-    }else if(event.target===selected_element||selected_element.contains(event.target)){
-        canvas.style.cursor="grab";
-    }else{
-        canvas.style.cursor="default";
-    }
+    if(handle){canvas.style.cursor=utils.get_resize_cursor(handle);}
+    else if(event.target===selected_element||selected_element.contains(event.target)){canvas.style.cursor="grab";}
+    else{canvas.style.cursor="default";}
 }
 async function save_svg(svg){
     const rawSvg=new XMLSerializer().serializeToString(svg);
@@ -230,11 +233,8 @@ async function save_svg(svg){
             const writable=await handle.createWritable();
             await writable.write(svgData);
             await writable.close();
-        }catch(error){
-            if(error.name!=="AbortError") {
-                console.error(error);
-            }
         }
+        catch(error){if(error.name!=="AbortError"){console.error(error);}}
     }else{
         const blob=new Blob([svgData],{type:"image/svg+xml"});
         const url=URL.createObjectURL(blob);
@@ -335,17 +335,15 @@ async function resolve_toolbar(tool){
 }
 const toolbar_shortcuts={
     b:["main-return"],
-    c:["tool-colorset","shape-compass"],
-    e:["shape-ellipse"],
+    e:["shape-ellipse","tool-vecna"],
     f:["main-fileoptions","tool-fill"],
     l:["shape-line"],
     n:["file-new"],
-    o:["file-open"],
+    o:["tool-colorset","shape-compass","file-open"],
     p:["tool-colorpick","shape-polygon"],
     r:["tool-reshape","shape-rectangle","file-resize"],
     s:["main-shape","tool-select","file-save"],
     t:["main-tools","tool-text"],
-    v:["tool-vecna"],
     z:["tool-zoom"]
 };
 async function resolve_toolbar_shortcut(key){
@@ -360,58 +358,29 @@ document.addEventListener("keydown",async (event)=>{
         deselect_element();
     }else if(event.key==="Delete"||event.key==="Backspace"){
         if(selected_element){
-            canvas.removeChild(selected_element);
-            deselect_element();
+            event.preventDefault();
+            delete_selected_element();
         }
     }else if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(event.key)){
         if(selected_element){
-            let moveAmount=10;
-            if(event.shiftKey){moveAmount=1;}
-            if(selected_element.localName==="rect"){
-                const dx=event.key==="ArrowRight"?moveAmount:event.key==="ArrowLeft"?-moveAmount:0;
-                const dy=event.key==="ArrowDown"?moveAmount:event.key==="ArrowUp"?-moveAmount:0;
-                const x=parseFloat(selected_element.getAttribute("x")||"0");
-                const y=parseFloat(selected_element.getAttribute("y")||"0");
-                selected_element.setAttribute("x",x+dx);
-                selected_element.setAttribute("y",y+dy);
-            }else if(selected_element.localName==="circle"||selected_element.localName==="ellipse"){
-                const dx=event.key==="ArrowRight"?moveAmount:event.key==="ArrowLeft"?-moveAmount:0;
-                const dy=event.key==="ArrowDown"?moveAmount:event.key==="ArrowUp"?-moveAmount:0;
-                const cx=parseFloat(selected_element.getAttribute("cx")||"0");
-                const cy=parseFloat(selected_element.getAttribute("cy")||"0");
-                selected_element.setAttribute("cx",cx+dx);
-                selected_element.setAttribute("cy",cy+dy);
-            }else if(selected_element.localName==="line"){
-                const dx=event.key==="ArrowRight"?moveAmount:event.key==="ArrowLeft"?-moveAmount:0;
-                const dy=event.key==="ArrowDown"?moveAmount:event.key==="ArrowUp"?-moveAmount:0;
-                const x1=parseFloat(selected_element.getAttribute("x1")||"0");
-                const y1=parseFloat(selected_element.getAttribute("y1")||"0");
-                const x2=parseFloat(selected_element.getAttribute("x2")||"0");
-                const y2=parseFloat(selected_element.getAttribute("y2")||"0");
-                selected_element.setAttribute("x1",x1+dx);
-                selected_element.setAttribute("y1",y1+dy);
-                selected_element.setAttribute("x2",x2+dx);
-                selected_element.setAttribute("y2",y2+dy);
-            }else{
-                const dx=event.key==="ArrowRight"?moveAmount:event.key==="ArrowLeft"?-moveAmount:0;
-                const dy=event.key==="ArrowDown"?moveAmount:event.key==="ArrowUp"?-moveAmount:0;
-                utils.translate_element(selected_element,dx,dy);
-            }
-            select_element(selected_element);
+            const moveAmount=event.shiftKey?1:10;
+            const dx=event.key==="ArrowRight"?moveAmount:event.key==="ArrowLeft"?-moveAmount:0;
+            const dy=event.key==="ArrowDown"?moveAmount:event.key==="ArrowUp"?-moveAmount:0;
+            move_selected_element(dx,dy);
         }
     }else{
         await resolve_toolbar_shortcut(event.key);
     }
 });
 canvas.addEventListener("pointerdown",(event)=>{
-    if(active_pointer_id!==null){return;}
+    if(!event.isPrimary||event.button!==0||active_pointer_id!==null){return;}
+    if(event.target===canvas&&current_tool!=="tool-select"){
+        deselect_element();
+    }
     if(current_tool==="tool-select"){
         const point=utils.get_svg_point(canvas,event);
         const existingHandle=selected_element?utils.get_resize_handle(point,selected_element.getBBox()):null;
-        if(event.target===canvas&&!existingHandle){
-            deselect_element();
-            return;
-        }
+        if(event.target===canvas&&!existingHandle){deselect_element();return;}
         if(event.target!==canvas&&selected_element!==event.target){
             select_element(event.target);
         }
@@ -429,8 +398,6 @@ canvas.addEventListener("pointerdown",(event)=>{
         active_pointer_id=event.pointerId;
         canvas.setPointerCapture(event.pointerId);
     }else{
-        active_pointer_id=event.pointerId;
-        drawing=true;
         start_point=utils.get_svg_point(canvas,event);
         if(current_tool==="shape-rectangle"){
             current_shape=document.createElementNS("http://www.w3.org/2000/svg","rect");
@@ -440,7 +407,6 @@ canvas.addEventListener("pointerdown",(event)=>{
             current_shape.setAttribute("height",0);
             current_shape.setAttribute("fill",current_color);
             canvas.appendChild(current_shape);
-            canvas.setPointerCapture(event.pointerId);
         }else if(current_tool==="shape-compass"){
             current_shape=document.createElementNS("http://www.w3.org/2000/svg","circle");
             current_shape.setAttribute("cx",start_point.x);
@@ -448,7 +414,6 @@ canvas.addEventListener("pointerdown",(event)=>{
             current_shape.setAttribute("r",0);
             current_shape.setAttribute("fill",current_color);
             canvas.appendChild(current_shape);
-            canvas.setPointerCapture(event.pointerId);
         }else if(current_tool==="shape-ellipse"){
             current_shape=document.createElementNS("http://www.w3.org/2000/svg","ellipse");
             current_shape.setAttribute("cx",start_point.x);
@@ -457,11 +422,16 @@ canvas.addEventListener("pointerdown",(event)=>{
             current_shape.setAttribute("ry",0);
             current_shape.setAttribute("fill",current_color);
             canvas.appendChild(current_shape);
+        }
+        if(current_shape){
+            active_pointer_id=event.pointerId;
+            drawing=true;
             canvas.setPointerCapture(event.pointerId);
         }
     }
 });
 canvas.addEventListener("pointermove",(event)=>{
+    if(active_pointer_id!==null&&event.pointerId!==active_pointer_id){return;}
     const point=utils.get_svg_point(canvas,event);
     update_cursor(point,event);
     if(drawing&&current_shape){
@@ -470,8 +440,8 @@ canvas.addEventListener("pointermove",(event)=>{
                 const dx=point.x-start_point.x;
                 const dy=point.y-start_point.y;
                 const size=Math.max(Math.abs(dx),Math.abs(dy));
-                const x=dx<0 ? start_point.x-size:start_point.x;
-                const y=dy<0 ? start_point.y-size:start_point.y;
+                const x=dx<0?start_point.x-size:start_point.x;
+                const y=dy<0?start_point.y-size:start_point.y;
                 current_shape.setAttribute("x",x);
                 current_shape.setAttribute("y",y);
                 current_shape.setAttribute("width",size);
@@ -516,7 +486,8 @@ canvas.addEventListener("pointermove",(event)=>{
     }else if(resizing&&selected_element){
         const dx=point.x-start_point.x;
         const dy=point.y-start_point.y;
-        utils.resize_element(selected_element,resize_handle,resize_box,dx,dy,resize_transform,event.shiftKey);
+        const preserveAspect=event.shiftKey&&resize_handle.length===2;
+        utils.resize_element(selected_element,resize_handle,resize_box,dx,dy,resize_transform,preserveAspect);
         select_element(selected_element);
         utils.set_resize_handles_visible(overlay,false);
     }else if(translating&&selected_element){
@@ -538,31 +509,32 @@ canvas.addEventListener("pointermove",(event)=>{
             selected_element.setAttribute("x2",x2);
             const y2=parseFloat(selected_element.getAttribute("y2"))+dy;
             selected_element.setAttribute("y2",y2);
-        }else{
-            utils.translate_element(selected_element,dx,dy);
-        }
+        }else{utils.translate_element(selected_element,dx,dy);}
         start_point=point;
         select_element(selected_element);
         utils.set_resize_handles_visible(overlay,false);
     }
 });
 canvas.addEventListener("pointerup",(event)=>{
-    if(active_pointer_id!==null&&event.pointerId!==active_pointer_id){return;}
+    if(active_pointer_id===null||event.pointerId!==active_pointer_id){return;}
     if(drawing){utils.stop_drawing(canvas,current_shape,event);}
     reset_interaction(event);
     if(selected_element){select_element(selected_element);}
 });
 canvas.addEventListener("pointercancel",(event)=>{
-    if(active_pointer_id!==null&&event.pointerId!==active_pointer_id){return;}
+    if(active_pointer_id===null||event.pointerId!==active_pointer_id){return;}
     reset_interaction(event,true);
     if(selected_element){select_element(selected_element);}
+});
+canvas.addEventListener("lostpointercapture",(event)=>{
+    if(active_pointer_id===event.pointerId){
+        reset_interaction(null,true);
+        if(selected_element){select_element(selected_element);}
+    }
 });
 toolbar.addEventListener("click",async (event)=>{
     const button=event.target.closest("[data-tool]");
     if(!button||!toolbar.contains(button)){return;}
-    try{
-        await resolve_toolbar(button.dataset.tool);
-    }catch(error){
-        console.error("Toolbar action failed:",error);
-    }
+    try{await resolve_toolbar(button.dataset.tool);}
+    catch(error){console.error("Toolbar action failed:",error);}
 });

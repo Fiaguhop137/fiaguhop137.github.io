@@ -44,10 +44,10 @@ export function set_resize_handles_visible(overlay,visible){
     });
 }
 export function resize_element(element,handle,box,dx,dy,originalTransform="",preserveAspect=false){
-    const left=box.x+(handle.includes("w")?dx:0);
-    const right=box.x+box.width+(handle.includes("e")?dx:0);
-    const top=box.y+(handle.includes("n")?dy:0);
-    const bottom=box.y+box.height+(handle.includes("s")?dy:0);
+    const left=handle.includes("w")?box.x+dx:box.x;
+    const right=handle.includes("e")?box.x+box.width+dx:box.x+box.width;
+    const top=handle.includes("n")?box.y+dy:box.y;
+    const bottom=handle.includes("s")?box.y+box.height+dy:box.y+box.height;
     let x=Math.min(left,right);
     let y=Math.min(top,bottom);
     let width=Math.max(1,Math.abs(right-left));
@@ -66,8 +66,8 @@ export function resize_element(element,handle,box,dx,dy,originalTransform="",pre
         }else{
             width=Math.max(1,height*aspect);
         }
-        if(handle.includes("w")){x=box.x+box.width-width;}
-        if(handle.includes("n")){y=box.y+box.height-height;}
+        if(handle.includes("w")){x=right-width;}
+        if(handle.includes("n")){y=bottom-height;}
     }
     if(!originalTransform&&element.localName==="rect"){
         element.setAttribute("x",x);
