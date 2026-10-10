@@ -1,4 +1,5 @@
 import {optimize} from 'https://cdn.jsdelivr.net/npm/svgo/+esm';
+import * as utils from './utils.js';
 const style=document.createElement("style");
 style.textContent=`
 html,body{
@@ -47,6 +48,10 @@ body{
 }
 #toolbar button:active {
     background: #ccc;
+}
+#toolbar button.active {
+    background: #bbb;
+    border-color: #aaa;
 }
 #workspace{
     display:flex;
@@ -157,71 +162,63 @@ let start_point=null;
 let current_shape=null;
 let selected_element=null;
 let translating=false;
-function get_svg_point(event){
-    const point=canvas.createSVGPoint();
-    point.x=event.clientX;
-    point.y=event.clientY;
-    return point.matrixTransform(canvas.getScreenCTM().inverse());
+let resizing=false;
+let resize_handle=null;
+let resize_box=null;
+let resize_transform="";
+let active_pointer_id=null;
+function select_element(element){
+    selected_element=element;
+    utils.select_element(overlay,element);
 }
-function shape_is_empty(shape){
-    switch(shape.localName){
-        case "rect":
-            return shape.width.baseVal.value===0||shape.height.baseVal.value===0;
-        case "circle":
-            return shape.r.baseVal.value===0;
-        case "ellipse":
-            return shape.rx.baseVal.value===0||shape.ry.baseVal.value===0;
-        default:
-            return false;
+function deselect_element(){
+    utils.deselect_element(overlay);
+    selected_element=null;
+    canvas.style.cursor="default";
+}
+function reset_interaction(event=null,cancelDrawing=false){
+    if(cancelDrawing&&current_shape?.parentNode===canvas){
+        canvas.removeChild(current_shape);
     }
-}
-function stop_drawing(event,cancel=false){
-    if(!drawing){return;}
-    if(current_shape&&(cancel||shape_is_empty(current_shape))){canvas.removeChild(current_shape);}
     drawing=false;
     start_point=null;
     current_shape=null;
-    if(event&&typeof event.pointerId==="number"&&canvas.hasPointerCapture(event.pointerId)){
-        canvas.releasePointerCapture(event.pointerId);
+    translating=false;
+    resizing=false;
+    resize_handle=null;
+    resize_box=null;
+    resize_transform="";
+    if(active_pointer_id!==null&&canvas.hasPointerCapture(active_pointer_id)){
+        canvas.releasePointerCapture(active_pointer_id);
     }
+    active_pointer_id=null;
+    utils.set_resize_handles_visible(overlay,true);
+    canvas.style.cursor="default";
 }
-function translate_element(element,dx,dy){
-    const transform=element.getAttribute("transform")||"";
-    const translation=`translate(${dx},${dy})`;
-    element.setAttribute("transform",transform?`${translation} ${transform}`:translation);
+function is_editable_target(target){
+    return target instanceof HTMLElement&&(
+        target.isContentEditable||
+        ["INPUT","TEXTAREA","SELECT"].includes(target.tagName)
+    );
 }
-function select_element(element){
-    selected_element=element;
-    const box=element.getBBox();
-    const x=box.x;
-    const y=box.y;
-    const width=box.width;
-    const height=box.height;
-    const mid_x=x+width/2;
-    const mid_y=y+height/2;
-    overlay.innerHTML=`
-        <rect x="${x}" y="${y}" width="${width}" height="${height}" fill="none" stroke="#5af" stroke-width="1"/>
-        <circle data-handle="n" cx="${mid_x}" cy="${y}" r="1.5" fill="#5af"/>
-        <circle data-handle="s" cx="${mid_x}" cy="${y+height}" r="1.5" fill="#5af"/>
-        <circle data-handle="w" cx="${x}" cy="${mid_y}" r="1.5" fill="#5af"/>
-        <circle data-handle="e" cx="${x+width}" cy="${mid_y}" r="1.5" fill="#5af"/>
-        <circle data-handle="nw" cx="${x}" cy="${y}" r="1.5" fill="#5af"/>
-        <circle data-handle="ne" cx="${x+width}" cy="${y}" r="1.5" fill="#5af"/>
-        <circle data-handle="sw" cx="${x}" cy="${y+height}" r="1.5" fill="#5af"/>
-        <circle data-handle="se" cx="${x+width}" cy="${y+height}" r="1.5" fill="#5af"/>
-        <line x1="${mid_x-1.5}" y1="${mid_y-1.5}" x2="${mid_x+1.5}" y2="${mid_y+1.5}" stroke="#5af" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="${mid_x-1.5}" y1="${mid_y+1.5}" x2="${mid_x+1.5}" y2="${mid_y-1.5}" stroke="#5af" stroke-width="1.5" stroke-linecap="round"/>
-    `
-    let outline=selected_element.cloneNode(true);
-    outline.setAttribute("fill","none");
-    outline.setAttribute("stroke","#5af");
-    outline.setAttribute("stroke-width","1.5");
-    outline.setAttribute("pointer-events","none");
-    overlay.appendChild(outline);
+function update_active_tool(){
+    toolbar.querySelectorAll("[data-tool]").forEach((button)=>{
+        button.classList.toggle("active",button.dataset.tool===current_tool);
+    });
 }
-function deselect_element(){
-    overlay.innerHTML="";
-    selected_element=null;
+function update_cursor(point,event){
+    if(!selected_element||resizing||translating){
+        return;
+    }
+    const box=selected_element.getBBox();
+    const handle=utils.get_resize_handle(point,box);
+    if(handle){
+        canvas.style.cursor=utils.get_resize_cursor(handle);
+    }else if(event.target===selected_element||selected_element.contains(event.target)){
+        canvas.style.cursor="grab";
+    }else{
+        canvas.style.cursor="default";
+    }
 }
 async function save_svg(svg){
     const rawSvg=new XMLSerializer().serializeToString(svg);
@@ -250,109 +247,116 @@ async function save_svg(svg){
         URL.revokeObjectURL(url);
     }
 }
-async function resolve_toolbar(tool){
-    switch(tool){
-        case "main-tools":
-            toolbar.innerHTML=`
-                ${tools}
-                <button data-tool="main-return">B͟ack</button>
-            `;
-            break;
-        case "main-shape":
-            toolbar.innerHTML=`
-                ${shapes}
-                <button data-tool="main-return">B͟ack</button>
-            `;
-            break;
-        case "main-fileoptions":
-            toolbar.innerHTML=`
-                ${fileoptions}
-                <button data-tool="main-return">B͟ack</button>
-            `;
-            break;
-        case "main-return":
-            toolbar.innerHTML=default_toolbar;
-            break;
-        case "tool-colorset":
-            toolbar.innerHTML=`
-                <input type="color" id="color_picker" value="${current_color}">
-                <button data-tool="main-return">B͟ack</button>
-            `;
-            const colorPicker=document.getElementById("color_picker");
-            colorPicker.addEventListener("input",(event)=>{
-                current_color=event.target.value;
-            });
-            break;
-        case "file-new":
-            if(!confirm("This will clear the entire canvas. Okay to proceed?")){break;}
-            canvas.innerHTML="";
-            deselect_element();
-            break;
-        case "file-resize":
-            const newWidth=parseFloat(prompt("Enter new width:",size[0]));
-            const newHeight=parseFloat(prompt("Enter new height:",size[1]));
-            if(Number.isFinite(newWidth)&&Number.isFinite(newHeight)&&newWidth>0&&newHeight>0){
-                size=[newWidth,newHeight];
-                canvas.setAttribute("width",size[0]);
-                canvas.setAttribute("height",size[1]);
-                canvas.setAttribute("viewBox",`0 0 ${size[0]} ${size[1]}`);
-                overlay.setAttribute("width",size[0]);
-                overlay.setAttribute("height",size[1]);
-                overlay.setAttribute("viewBox",`0 0 ${size[0]} ${size[1]}`);
-            }
-            break;
-        case "file-open":
-            if(!confirm("This will clear the entire canvas. Okay to proceed?")){break;}
-            const input=document.createElement("input");
-            input.type="file";
-            input.accept=".svg";
-            input.addEventListener("change",(event)=>{
-                const file=event.target.files[0];
-                if(file){
-                    const reader=new FileReader();
-                    reader.onload=(e)=>{
-                        const parser=new DOMParser();
-                        const doc=parser.parseFromString(e.target.result,"image/svg+xml");
-                        const loadedSvg=doc.documentElement;
-                        if(loadedSvg.nodeName!=="svg"){
-                            alert("That isn't a valid SVG file.");
-                            return;
-                        }
-                        canvas.innerHTML=loadedSvg.innerHTML;
-                        const viewBox=loadedSvg.getAttribute("viewBox");
-                        const viewBoxValues=viewBox?.trim().split(/[\s,]+/).map(Number);
-                        const viewBoxWidth=viewBoxValues?.length===4&&Number.isFinite(viewBoxValues[2])?viewBoxValues[2]:null;
-                        const viewBoxHeight=viewBoxValues?.length===4&&Number.isFinite(viewBoxValues[3])?viewBoxValues[3]:null;
-                        const width=parseFloat(loadedSvg.getAttribute("width")||"");
-                        const height=parseFloat(loadedSvg.getAttribute("height")||"");
-                        size=[
-                            Number.isFinite(width)&&width>0?width:viewBoxWidth||480,
-                            Number.isFinite(height)&&height>0?height:viewBoxHeight||360
-                        ];
-                        canvas.setAttribute("width",loadedSvg.getAttribute("width")||size[0]);
-                        canvas.setAttribute("height",loadedSvg.getAttribute("height")||size[1]);
-                        canvas.setAttribute("viewBox",viewBox||`0 0 ${size[0]} ${size[1]}`);
-                        overlay.setAttribute("width",canvas.getAttribute("width"));
-                        overlay.setAttribute("height",canvas.getAttribute("height"));
-                        overlay.setAttribute("viewBox",canvas.getAttribute("viewBox"));
-                        deselect_element();
-                    };
-                    reader.readAsText(file);
+function show_toolbar(content){
+    toolbar.innerHTML=`${content}<button data-tool="main-return">B͟ack</button>`;
+    update_active_tool();
+}
+const toolbar_actions={
+    "main-tools":()=>show_toolbar(tools),
+    "main-shape":()=>show_toolbar(shapes),
+    "main-fileoptions":()=>show_toolbar(fileoptions),
+    "main-return":()=>{
+        toolbar.innerHTML=default_toolbar;
+        update_active_tool();
+    },
+    "tool-colorset":()=>{
+        show_toolbar(`<input type="color" id="color_picker" value="${current_color}">`);
+        document.getElementById("color_picker").addEventListener("input",(event)=>{
+            current_color=event.target.value;
+        });
+    },
+    "file-new":()=>{
+        if(!confirm("This will clear the entire canvas. Okay to proceed?")){return;}
+        reset_interaction(null,true);
+        canvas.innerHTML="";
+        deselect_element();
+    },
+    "file-resize":()=>{
+        const newWidth=parseFloat(prompt("Enter new width:",size[0]));
+        const newHeight=parseFloat(prompt("Enter new height:",size[1]));
+        if(Number.isFinite(newWidth)&&Number.isFinite(newHeight)&&newWidth>0&&newHeight>0){
+            size=[newWidth,newHeight];
+            canvas.setAttribute("width",size[0]);
+            canvas.setAttribute("height",size[1]);
+            canvas.setAttribute("viewBox",`0 0 ${size[0]} ${size[1]}`);
+            overlay.setAttribute("width",size[0]);
+            overlay.setAttribute("height",size[1]);
+            overlay.setAttribute("viewBox",`0 0 ${size[0]} ${size[1]}`);
+        }
+    },
+    "file-open":()=>{
+        if(!confirm("This will clear the entire canvas. Okay to proceed?")){return;}
+        reset_interaction(null,true);
+        const input=document.createElement("input");
+        input.type="file";
+        input.accept=".svg";
+        input.addEventListener("change",(event)=>{
+            const file=event.target.files[0];
+            if(!file){return;}
+            const reader=new FileReader();
+            reader.onload=(e)=>{
+                const parser=new DOMParser();
+                const doc=parser.parseFromString(e.target.result,"image/svg+xml");
+                const loadedSvg=doc.documentElement;
+                if(loadedSvg.nodeName!=="svg"){
+                    alert("That isn't a valid SVG file.");
+                    return;
                 }
-            });
-            input.click();
-            break;
-        case "file-save":
-            await save_svg(canvas);
-            break;
-        default:
-            current_tool=tool;
-            break;
-    }
+                canvas.innerHTML=loadedSvg.innerHTML;
+                const viewBox=loadedSvg.getAttribute("viewBox");
+                const viewBoxValues=viewBox?.trim().split(/[\s,]+/).map(Number);
+                const viewBoxWidth=viewBoxValues?.length===4&&Number.isFinite(viewBoxValues[2])?viewBoxValues[2]:null;
+                const viewBoxHeight=viewBoxValues?.length===4&&Number.isFinite(viewBoxValues[3])?viewBoxValues[3]:null;
+                const width=parseFloat(loadedSvg.getAttribute("width")||"");
+                const height=parseFloat(loadedSvg.getAttribute("height")||"");
+                size=[Number.isFinite(width)&&width>0?width:viewBoxWidth||480,Number.isFinite(height)&&height>0?height:viewBoxHeight||360];
+                canvas.setAttribute("width",loadedSvg.getAttribute("width")||size[0]);
+                canvas.setAttribute("height",loadedSvg.getAttribute("height")||size[1]);
+                canvas.setAttribute("viewBox",viewBox||`0 0 ${size[0]} ${size[1]}`);
+                overlay.setAttribute("width",canvas.getAttribute("width"));
+                overlay.setAttribute("height",canvas.getAttribute("height"));
+                overlay.setAttribute("viewBox",canvas.getAttribute("viewBox"));
+                deselect_element();
+            };
+            reader.readAsText(file);
+        });
+        input.click();
+    },
+    "file-save":()=>save_svg(canvas)
 };
+async function resolve_toolbar(tool){
+    const action=toolbar_actions[tool];
+    if(action){
+        await action();
+    }else{
+        current_tool=tool;
+        update_active_tool();
+    }
+}
+const toolbar_shortcuts={
+    b:["main-return"],
+    c:["tool-colorset","shape-compass"],
+    e:["shape-ellipse"],
+    f:["main-fileoptions","tool-fill"],
+    l:["shape-line"],
+    n:["file-new"],
+    o:["file-open"],
+    p:["tool-colorpick","shape-polygon"],
+    r:["tool-reshape","shape-rectangle","file-resize"],
+    s:["main-shape","tool-select","file-save"],
+    t:["main-tools","tool-text"],
+    v:["tool-vecna"],
+    z:["tool-zoom"]
+};
+async function resolve_toolbar_shortcut(key){
+    const tools=toolbar_shortcuts[key]||[];
+    const tool=tools.find((name)=>toolbar.querySelector(`[data-tool="${name}"]`));
+    if(tool){await resolve_toolbar(tool);}
+}
 document.addEventListener("keydown",async (event)=>{
+    if(is_editable_target(event.target)){return;}
     if(event.key==="Escape"){
-        if(drawing){stop_drawing(null,true);}
+        reset_interaction(null,true);
         deselect_element();
     }else if(event.key==="Delete"||event.key==="Backspace"){
         if(selected_element){
@@ -391,93 +395,43 @@ document.addEventListener("keydown",async (event)=>{
             }else{
                 const dx=event.key==="ArrowRight"?moveAmount:event.key==="ArrowLeft"?-moveAmount:0;
                 const dy=event.key==="ArrowDown"?moveAmount:event.key==="ArrowUp"?-moveAmount:0;
-                translate_element(selected_element,dx,dy);
+                utils.translate_element(selected_element,dx,dy);
             }
             select_element(selected_element);
         }
-    }else if(event.key==="b"){
-        await resolve_toolbar("main-return");
-    }else if(event.key==="c"){
-        if(toolbar.querySelector("[data-tool='tool-colorset']")){
-            await resolve_toolbar("tool-colorset");
-        }else if(toolbar.querySelector("[data-tool='shape-compass']")){
-            await resolve_toolbar("shape-compass");
-        }
-    }else if(event.key==="e"){
-        if(toolbar.querySelector("[data-tool='shape-ellipse']")){
-            await resolve_toolbar("shape-ellipse");
-        }
-    }else if(event.key==="f"){
-        if(toolbar.querySelector("[data-tool='main-fileoptions']")){
-            await resolve_toolbar("main-fileoptions");
-        }else if(toolbar.querySelector("[data-tool='tool-fill']")){
-            await resolve_toolbar("tool-fill");
-        }
-    }else if(event.key==="l"){
-        if(toolbar.querySelector("[data-tool='shape-line']")){
-            await resolve_toolbar("shape-line");
-        }
-    }else if(event.key==="n"){
-        if(toolbar.querySelector("[data-tool='file-new']")){
-            await resolve_toolbar("file-new");
-        }
-    }else if(event.key==="o"){
-        if(toolbar.querySelector("[data-tool='file-open']")){
-            await resolve_toolbar("file-open");
-        }
-    }else if(event.key==="p"){
-        if(toolbar.querySelector("[data-tool='tool-colorpick']")){
-            await resolve_toolbar("tool-colorpick");
-        }else if(toolbar.querySelector("[data-tool='shape-polygon']")){
-            await resolve_toolbar("shape-polygon");
-        }
-    }else if(event.key==="r"){
-        if(toolbar.querySelector("[data-tool='tool-reshape']")){
-            await resolve_toolbar("tool-reshape");
-        }else if(toolbar.querySelector("[data-tool='shape-rectangle']")){
-            await resolve_toolbar("shape-rectangle");
-        }else if(toolbar.querySelector("[data-tool='file-resize']")){
-            await resolve_toolbar("file-resize");
-        }
-    }else if(event.key==="s"){
-        if(toolbar.querySelector("[data-tool='main-shape']")){
-            await resolve_toolbar("main-shape");
-        }else if(toolbar.querySelector("[data-tool='tool-select']")){
-            await resolve_toolbar("tool-select");
-        }else if(toolbar.querySelector("[data-tool='file-save']")){
-            await resolve_toolbar("file-save");
-        }
-    }else if(event.key==="t"){
-        if(toolbar.querySelector("[data-tool='main-tools']")){
-            await resolve_toolbar("main-tools");
-        }else if(toolbar.querySelector("[data-tool='tool-text']")){
-            await resolve_toolbar("tool-text");
-        }
-    }else if(event.key==="v"){
-        if(toolbar.querySelector("[data-tool='tool-vecna']")){
-            await resolve_toolbar("tool-vecna");
-        }
-    }else if(event.key==="z"){
-        if(toolbar.querySelector("[data-tool='tool-zoom']")){
-            await resolve_toolbar("tool-zoom");
-        }
+    }else{
+        await resolve_toolbar_shortcut(event.key);
     }
 });
 canvas.addEventListener("pointerdown",(event)=>{
+    if(active_pointer_id!==null){return;}
     if(current_tool==="tool-select"){
-        if(event.target===canvas){
+        const point=utils.get_svg_point(canvas,event);
+        const existingHandle=selected_element?utils.get_resize_handle(point,selected_element.getBBox()):null;
+        if(event.target===canvas&&!existingHandle){
             deselect_element();
             return;
         }
-        if(selected_element!==event.target){
+        if(event.target!==canvas&&selected_element!==event.target){
             select_element(event.target);
         }
-        translating=true;
-        start_point=get_svg_point(event);
+        resize_handle=selected_element?utils.get_resize_handle(point,selected_element.getBBox()):null;
+        if(resize_handle){
+            resizing=true;
+            resize_box=selected_element.getBBox();
+            resize_transform=selected_element.getAttribute("transform")||"";
+        }else{
+            translating=true;
+        }
+        start_point=point;
+        utils.set_resize_handles_visible(overlay,false);
+        canvas.style.cursor=resizing?utils.get_resize_cursor(resize_handle):"grabbing";
+        active_pointer_id=event.pointerId;
         canvas.setPointerCapture(event.pointerId);
     }else{
+        active_pointer_id=event.pointerId;
         drawing=true;
-        start_point=get_svg_point(event);
+        start_point=utils.get_svg_point(canvas,event);
         if(current_tool==="shape-rectangle"){
             current_shape=document.createElementNS("http://www.w3.org/2000/svg","rect");
             current_shape.setAttribute("x",start_point.x);
@@ -508,7 +462,8 @@ canvas.addEventListener("pointerdown",(event)=>{
     }
 });
 canvas.addEventListener("pointermove",(event)=>{
-    const point=get_svg_point(event);
+    const point=utils.get_svg_point(canvas,event);
+    update_cursor(point,event);
     if(drawing&&current_shape){
         if(current_shape.localName==="rect"){
             if(event.shiftKey){
@@ -558,6 +513,12 @@ canvas.addEventListener("pointermove",(event)=>{
                 current_shape.setAttribute("ry",height/2);
             }
         }
+    }else if(resizing&&selected_element){
+        const dx=point.x-start_point.x;
+        const dy=point.y-start_point.y;
+        utils.resize_element(selected_element,resize_handle,resize_box,dx,dy,resize_transform,event.shiftKey);
+        select_element(selected_element);
+        utils.set_resize_handles_visible(overlay,false);
     }else if(translating&&selected_element){
         const dx=point.x-start_point.x;
         const dy=point.y-start_point.y;
@@ -578,27 +539,30 @@ canvas.addEventListener("pointermove",(event)=>{
             const y2=parseFloat(selected_element.getAttribute("y2"))+dy;
             selected_element.setAttribute("y2",y2);
         }else{
-            translate_element(selected_element,dx,dy);
+            utils.translate_element(selected_element,dx,dy);
         }
         start_point=point;
         select_element(selected_element);
+        utils.set_resize_handles_visible(overlay,false);
     }
 });
 canvas.addEventListener("pointerup",(event)=>{
-    if(drawing){stop_drawing(event);}
-    if(translating){
-        translating=false;
-        start_point=null;
-    }
-    if(canvas.hasPointerCapture(event.pointerId)){canvas.releasePointerCapture(event.pointerId);}
+    if(active_pointer_id!==null&&event.pointerId!==active_pointer_id){return;}
+    if(drawing){utils.stop_drawing(canvas,current_shape,event);}
+    reset_interaction(event);
+    if(selected_element){select_element(selected_element);}
 });
 canvas.addEventListener("pointercancel",(event)=>{
-    if(drawing){stop_drawing(event,true);}
-    translating=false;
-    start_point=null;
-    if(canvas.hasPointerCapture(event.pointerId)){canvas.releasePointerCapture(event.pointerId);}
+    if(active_pointer_id!==null&&event.pointerId!==active_pointer_id){return;}
+    reset_interaction(event,true);
+    if(selected_element){select_element(selected_element);}
 });
 toolbar.addEventListener("click",async (event)=>{
-    const tool=event.target.dataset.tool;
-    resolve_toolbar(tool);
+    const button=event.target.closest("[data-tool]");
+    if(!button||!toolbar.contains(button)){return;}
+    try{
+        await resolve_toolbar(button.dataset.tool);
+    }catch(error){
+        console.error("Toolbar action failed:",error);
+    }
 });
