@@ -5,6 +5,7 @@
         <iframe src="../pages/header.html" style="width:100%;height:30px;overflow:hidden;border:none"></iframe>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Yttria Language Documentation</title>
+        <link rel="stylesheet" href="../styles/text.css">
         <style>
             body{
                 font-family:system-ui, sans-serif;
@@ -12,9 +13,6 @@
                 margin:0 auto;
                 padding:2rem;
                 line-height:1.6;
-            }
-            h1,h2,h3,h4{
-                line-height:1.2;
             }
             pre{
                 padding:1rem;
@@ -46,6 +44,30 @@
             th{
                 background:#f0f0f0;
             }
+            .compiler-box{
+                margin-top:2rem;
+                padding:1rem;
+                border:1px solid #ccc;
+                border-radius:6px;
+            }
+            .compiler-box textarea{
+                display:block;
+                box-sizing:border-box;
+                width:100%;
+                min-height:12rem;
+                margin:1rem 0;
+                padding:0.75rem;
+                font-family:monospace;
+                resize:vertical;
+            }
+            .compiler-box input[type="file"]{
+                display:block;
+                margin-bottom:1rem;
+            }
+            .compiler-box button{
+                padding:0.5rem 1rem;
+                cursor:pointer;
+            }
         </style>
     </head>
     <body>
@@ -55,7 +77,7 @@
             <p>A strongly typed, explicit, general-purpose programming language designed around readable syntax and direct control over storage access. </p>
             <p>Yes I used AI to write this for me cuz my lazy ass couldn't be bothered to write a whole ass essay</p>
         </header>
-        <nav>
+        <nav aria-label="Documentation contents">
             <strong>Contents</strong>
             <ul>
                 <li><a href="#philosophy">Design Philosophy</a></li>
@@ -84,18 +106,19 @@
             <section id="programs">
                 <h2>Program Structure</h2>
                 <p>A program consists of declarations and statements. Functions are declared using the <code>fun</code> keyword. </p>
-                <pre><code>fun int main(){<br/>    io.console.output("Hello, world!");<br/>    return(0);<br/>};</code></pre>
+                <pre><code>fun uint8 main(){<br/>    io.console.output("Hello, world!");<br/>    return(0);<br/>};</code></pre>
                 <p><code>main</code> is the entry point of the program. </p>
+                <p>Yttria source files use the <code>.ytr</code> file extension. The Yttria compiler translates <code>.ytr</code> source files into JavaScript. </p>
                 <p>Compound constructs such as functions, conditionals, loops, and exception handlers are terminated with a semicolon after their closing brace. </p>
                 <p>Comments are denoted by two forward slashes (//) and extend to the end of the line. They can also be denoted with /* */ for multi-line comments.</p>
             </section>
             <section id="variables">
                 <h2>Variables</h2>
                 <p>Variables are declared with <code>let</code>, followed by their mutability, type, name, and optional initial value. </p>
-                <pre><code>let mut int x=10;<br/>let const string y="hello";</code></pre>
+                <pre><code>let mut sint32 x=10;<br/>let const string y="hello";</code></pre>
                 <h3>Mutable variables</h3>
                 <p>A variable declared with <code>mut</code> may be modified after declaration. </p>
-                <pre><code>let mut int score=100;<br/>set score=get(score)+10;</code></pre>
+                <pre><code>let mut sint32 score=100;<br/>set score=get(score)+10;</code></pre>
                 <h3>Constant variables</h3>
                 <p>A variable declared with <code>const</code> cannot be modified through that binding. </p>
                 <pre><code>let const string name="Alice";</code></pre>
@@ -103,7 +126,7 @@
                 <pre><code>let const string name="Alice";<br/>io.console.output(get(name));<br/>let const string name="Bob";<br/>io.console.output(get(name));</code></pre>
                 <h3>Shadowing</h3>
                 <p>A declaration may shadow another declaration with the same name. Shadowing may also change the type associated with that name. </p>
-                <pre><code>let const int x=10;<br/>io.console.output(get(x));<br/>let const string x="hello";<br/>io.console.output(get(x));</code></pre>
+                <pre><code>let const uint4 x=10;<br/>io.console.output("".join([str(get(x)),'\n']));<br/>let const string x="hello";<br/>io.console.output(get(x));</code></pre>
                 <p>This prints:</p>
                 <pre><code>10<br/>hello</code></pre>
             </section>
@@ -111,25 +134,26 @@
                 <h2>Storage Access</h2>
                 <p>Variables represent storage. The <code>get</code> operation retrieves the value stored there. </p>
                 <p>A variable expression refers to its storage location. The <code>get</code> operation retrieves the value stored at that location, leaving it out returns a pointer to the storage location, which is usually undesirable behavior. </p>
-                <pre><code>let const int x=10;<br/>io.console.output(get(x)); // Prints 10<br/>io.console.output(x); // Prints the pointer(e.g., 0x7fff5fbff6d0)</code></pre>
+                <pre><code>let const uint4 x=10;<br/>io.console.output(get(x)); // Prints 10<br/>io.console.output(x); // Prints the pointer(e.g., 0x7fff5fbff6d0)</code></pre>
                 <p>Assignment is performed using <code>set</code>.</p>
-                <pre><code>let mut int x=10;<br/>set x=get(x)+5;</code></pre>
+                <pre><code>let mut sint32 x=10;<br/>set x=get(x)+5;</code></pre>
                 <p>The distinction between a variable and its stored value is an intentional part of the language. </p>
             </section>
             <section id="types">
                 <h2>Types</h2>
                 <p>The language is strongly typed. Types are written explicitly in declarations and function signatures. </p>
                 <table>
+                    <caption>Built-in types</caption>
                     <thead>
                         <tr>
-                            <th>Type</th>
-                            <th>Example</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Example</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><code>int</code></td>
-                            <td><code>let const int x=10;</code></td>
+                            <td><code>uint32</code></td>
+                            <td><code>let const uint32 x=10;</code></td>
                         </tr>
                         <tr>
                             <td><code>string</code></td>
@@ -141,7 +165,82 @@
                         </tr>
                         <tr>
                             <td><code>vector[T]</code></td>
-                            <td><code>let const vector[int] numbers=[1,2,3];</code></td>
+                            <td><code>let const vector[sint32] numbers=[1,2,3];</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3>Integer Types</h3>
+                <p>Integer types are specified with a sign and size. </p>
+                <table>
+                    <caption>Integer types</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Type</th>
+                            <th scope="col">Size</th>
+                            <th scope="col">Sign</th>
+                            <th scope="col">Range</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>uint4</code></td>
+                            <td>4 bits</td>
+                            <td>Unsigned</td>
+                            <td>0 to 15</td>
+                        </tr>
+                        <tr>
+                            <td><code>uint8</code></td>
+                            <td>8 bits</td>
+                            <td>Unsigned</td>
+                            <td>0 to 255</td>
+                        </tr>
+                        <tr>
+                            <td><code>uint16</code></td>
+                            <td>16 bits</td>
+                            <td>Unsigned</td>
+                            <td>0 to 65,535</td>
+                        </tr>
+                        <tr>
+                            <td><code>uint32</code></td>
+                            <td>32 bits</td>
+                            <td>Unsigned</td>
+                            <td>0 to 4,294,967,295</td>
+                        </tr>
+                        <tr>
+                            <td><code>uint64</code></td>
+                            <td>64 bits</td>
+                            <td>Unsigned</td>
+                            <td>0 to 18,446,744,073,709,551,615</td>
+                        </tr>
+                        <tr>
+                            <td><code>sint4</code></td>
+                            <td>4 bits</td>
+                            <td>Signed</td>
+                            <td>-8 to 7</td>
+                        </tr>
+                        <tr>
+                            <td><code>sint8</code></td>
+                            <td>8 bits</td>
+                            <td>Signed</td>
+                            <td>-128 to 127</td>
+                        </tr>
+                        <tr>
+                            <td><code>sint16</code></td>
+                            <td>16 bits</td>
+                            <td>Signed</td>
+                            <td>-32,768 to 32,767</td>
+                        </tr>
+                        <tr>
+                            <td><code>sint32</code></td>
+                            <td>32 bits</td>
+                            <td>Signed</td>
+                            <td>-2,147,483,648 to 2,147,483,647</td>
+                        </tr>
+                        <tr>
+                            <td><code>sint64</code></td>
+                            <td>64 bits</td>
+                            <td>Signed</td>
+                            <td>-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807</td>
                         </tr>
                     </tbody>
                 </table>
@@ -151,13 +250,14 @@
                 <p>Functions use the following general form: </p>
                 <pre><code>fun &lt;return type&gt; &lt;name&gt;(&lt;parameters&gt;){<br/>    &lt;statements&gt;<br/>};</code></pre>
                 <p>Parameters use the same declaration syntax as local variables. </p>
-                <pre><code>fun int add(let const int a,let const int b){<br/>    return(get(a)+get(b));<br/>};</code></pre>
+                <p>Function arguments bind to storage locations. Inside the function, use <code>get</code> to retrieve an argument's value.</p>
+                <pre><code>fun sint32 add(let const sint32 a,let const sint32 b){<br/>    return(get(a)+get(b));<br/>};</code></pre>
                 <p>Functions return values with <code>return</code>.</p>
                 <pre><code>return(get(a)+get(b));</code></pre>
                 <h3>Function calls</h3>
                 <p>Functions are called by name with arguments in parentheses. </p>
                 <p>For example:</p>
-                <pre><code>let const int x=10;<br/>let const int y=20;<br/>let const int result=add(x,y);</code></pre>
+                <pre><code>let const uint8 x=10;<br/>let const uint8 y=20;<br/>let const uint8 result=add(x,y);</code></pre>
             </section>
             <section id="conditionals">
                 <h2>Conditionals</h2>
@@ -170,19 +270,19 @@
                 <h2>Loops</h2>
                 <h3>While</h3>
                 <p>A <code>while</code> loop executes a block of code repeatedly while a condition is true. </p>
-                <pre><code>let mut int count=1;<br/>while(get(count)<=5){<br/>    io.console.output(get(count));<br/>    set count=get(count)+1;<br/>};</code></pre>
+                <pre><code>let mut uint4 count=1;<br/>while(get(count)<=5){<br/>    io.console.output(get(count));<br/>    set count=get(count)+1;<br/>};</code></pre>
                 <h3>For-in</h3>
                 <p>A <code>for</code> loop iterates over a value using <code>in</code>. </p>
-                <pre><code>for(let const int number) in(get(numbers)){<br/>    io.console.output(get(number));<br/>};</code></pre>
+                <pre><code>for(let const sint32 number) in(get(numbers)){<br/>    io.console.output(get(number));<br/>};</code></pre>
             </section>
             <section id="vectors">
                 <h2>Vectors</h2>
                 <p>Vectors contain multiple values of a specified type. </p>
-                <pre><code>let const vector[int] numbers=[1,2,3,4,5];</code></pre>
+                <pre><code>let const vector[sint32] numbers=[1,2,3,4,5];</code></pre>
                 <p>Vector types can be nested. </p>
-                <pre><code>vector[vector[int]]</code></pre>
+                <pre><code>vector[vector[sint32]]</code></pre>
                 <p>Vectors can be iterated with a <code>for-in</code> loop. </p>
-                <pre><code>for(let const int number) in(get(numbers)){<br/>    io.console.output(get(number));<br/>};</code></pre>
+                <pre><code>for(let const sint32 number) in(get(numbers)){<br/>    io.console.output(get(number));<br/>};</code></pre>
             </section>
             <section id="exceptions">
                 <h2>Exception Handling</h2>
@@ -193,12 +293,13 @@
             </section>
             <section id="operators">
                 <h2>Operators</h2>
-                <p>Arithmetic operators operate on compatible numeric values. </p>
+                <p>Arithmetic and comparison operators operate on compatible numeric values. </p>
                 <table>
+                    <caption>Operators</caption>
                     <thead>
                         <tr>
-                            <th>Operator</th>
-                            <th>Meaning</th>
+                            <th scope="col">Operator</th>
+                            <th scope="col">Meaning</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -276,10 +377,19 @@
             <section id="complete-example">
                 <h2>Complete Example</h2>
                 <p>The following program demonstrates functions, variables, vectors, iteration, arithmetic, and console output. </p>
-                <pre><code>fun int factorial(let const int n){<br/>    let mut int result=1;<br/>    for(let const int iterator) in(range(2,get(n)+1)){<br/>        set result=get(result)*get(iterator);<br/>    };<br/>    return(get(result));<br/>};<br/>fun int main(){<br/>    let const int number=5;<br/>    let const int result=factorial(number);<br/>    io.console.output("Factorial: ");<br/>    io.console.output(get(result));<br/>    return(0);<br/>};</code></pre>
+                <pre><code>fun sint32 factorial(let const sint32 n){<br/>    let mut sint32 result=1;<br/>    for(let const sint32 iterator) in(range(2,get(n)+1)){<br/>        set result=get(result)*get(iterator);<br/>    };<br/>    return(get(result));<br/>};<br/>fun uint8 main(){<br/>    let const sint32 number=5;<br/>    let const sint32 result=factorial(number);<br/>    io.console.output("Factorial: ");<br/>    io.console.output(get(result));<br/>    return(0);<br/>};</code></pre>
                 <p>Output: </p>
                 <pre><code>Factorial: 120</code></pre>
             </section>
+            <section class="compiler-box" id="yttria-compiler">
+                <h2>Try Yttria</h2>
+                <label for="yttria-code-input">Yttria source code</label>
+                <textarea id="yttria-code-input" name="yttria-code" placeholder="Paste Yttria code here"></textarea>
+                <label for="yttria-file-input">Or upload a <code>.ytr</code> file</label>
+                <input id="yttria-file-input" name="yttria-file" type="file" accept=".ytr">
+                <button id="yttria-compile-button" type="button">Compile</button>
+            </section>
+            <script src="../scripts/yttria.js"></script>
         </main>
         <footer>
             <hr/>
