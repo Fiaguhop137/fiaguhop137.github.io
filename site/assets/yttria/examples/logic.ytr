@@ -1,0 +1,18 @@
+logic{
+    fun boolean or(let const boolean a,let const boolean b){
+        if(get(a)){return(true);};
+        if(get(b)){return(true);};
+        return(false);
+    };
+    fun boolean and(let const boolean a,let const boolean b){
+        if(get(a)){if(get(b)){return(true);};};
+        return(false);
+    };
+    fun boolean not(let const boolean a){
+        if(get(a)){return(false);};
+        return(true);
+    };
+    fun null pass(){
+        return;
+    };
+};

@@ -1,0 +1,14 @@
+io{
+    console{
+        fun null output(let const string value){
+            write(stdout,get(value),len(value));
+        };
+        fun string input(let const string value){
+            io.console.output(value);
+            return(read(stdin,1024))
+        };
+        fun null error(let const string value){
+            write(stderr,get(value),len(value));
+        };
+    };
+};

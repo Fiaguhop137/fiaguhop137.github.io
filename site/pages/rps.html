@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>rock paper scissors</title>
+        <link rel="stylesheet" href="../stylesheets/text.css">
+        <iframe src="../pages/header.html" style="width:100%;height:30px;overflow:hidden;border:none"></iframe>
+    </head>
+    <body>
+        <main>
+            <h1>rock paper scissors</h1>
+            <p>this is a simple rock paper scissors game made with javascript. it has no hidden twist of any kind, but i hope you enjoy it!</p>
+            <button id="rock">rock</button>
+            <button id="paper">paper</button>
+            <button id="scissors">scissors</button>
+            <p id="result"></p>
+            <p id="wl"></p>
+            <img id="dead" src="../assets/blood.avif" hidden="true" style="width:80wh;height:80vh;"/>
+            <script>
+                let wins=0;
+                let losses=0;
+                const buttons=document.querySelectorAll('button');
+                const result=document.getElementById('result');
+                buttons.forEach(button=>{
+                    button.addEventListener('click',()=>{
+                        const playerChoice=button.id;
+                        const computerChoice=getComputerChoice();
+                        const winner=determineWinner(playerChoice, computerChoice);
+                        const wlRatio=wins/losses;
+                        document.getElementById('wl').textContent=`Win-Loss Ratio:${wlRatio.toFixed(2)}`;
+                        result.textContent=`You chose ${playerChoice}. I chose ${computerChoice}. ${winner}`;
+                        if(winner==="You win!"){result.style.color="green";}
+                        else if(winner==="Computer wins!"){result.style.color="red";}
+                        else if(winner==="It's a tie!"){result.style.color="black";}
+                        else if(winner==="You died!"){
+                            result.style.color="black";
+                            document.getElementById('dead').hidden=false;
+                            buttons.forEach(btn=>btn.disabled=true);
+                        }
+                    });
+                });
+                function getComputerChoice(){
+                    const choices=['rock','paper','scissors','glock'];
+                    const randomIndex=Math.floor(Math.random()*choices.length);
+                    return choices[randomIndex];
+                }
+                function determineWinner(player, computer) {
+                    if(player===computer){return "It's a tie!";}
+                    else if(computer==='glock'){return "You died!";}
+                    else if(
+                        (player==='rock'&&computer==='scissors')||
+                        (player==='paper'&&computer==='rock')||
+                        (player==='scissors'&&computer==='paper')
+                    ){wins++;return "You win!";}
+                    else{losses++;return "Computer wins!";}
+                }
+            </script>
+        </main>
+    </body>
+</html>

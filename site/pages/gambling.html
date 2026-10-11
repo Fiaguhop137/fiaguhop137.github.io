@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../stylesheets/text.css">
+        <style>
+            :root{
+                --bg: #fff;
+                --panel: #fff;
+                --border: #ddd;
+                --green-hover: #36c96c;
+                --text: #000;
+            }
+            *{box-sizing:border-box;}
+            body{
+                margin:0;
+                min-height:100vh;
+                background:#fff;
+                color:#000;
+                font-family:system-ui, sans-serif;
+                line-height:1.6;
+            }
+            main{
+                width: min(720px, calc(100% - 32px));
+                margin: 48px auto;
+                padding: 32px;
+                background: var(--panel);
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                box-shadow: 0 12px 40px #0005;
+            }
+            h1{
+                margin-top:0;
+                font-size:2.4rem;
+                letter-spacing:-1px;
+            }
+            #balance,
+            #debt{
+                margin:12px 0;
+                padding:16px;
+                background:#ccc;
+                border:1px solid var(--border);
+                border-radius:10px;
+                font-family:monospace;
+                font-size:1.25rem;
+            }
+            #balance{color:#5a5;}
+            #debt{color:#a55;}
+            input {
+                display: block;
+                width: 100%;
+                margin: 16px 0 10px;
+                padding: 12px 14px;
+                background: #eee;
+                color:#000;
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                font: inherit;
+            }
+            input:focus{
+                outline:2px solid var(--green);
+                outline-offset:2px;
+            }
+            input:disabled{opacity: 0.45;}
+            button {
+                margin:6px 6px 6px 0;
+                padding:11px 18px;
+                background:#ccc;
+                color:var(--text);
+                border:1px solid #bbb;
+                border-radius:8px;
+                font:inherit;
+                font-weight:600;
+                cursor:pointer;
+                transition:background 120ms, transform 120ms;
+            }
+            button:hover:not(:disabled) {
+                background:#ddd;
+                transform:translateY(-1px);
+            }
+            button:active:not(:disabled) {
+                transform:translateY(0);
+            }
+            button:disabled{
+                opacity:0.35;
+                cursor:not-allowed;
+            }
+            #betButton,
+            #flipButton,
+            #loanButton {
+                background: #ccc;
+                border-color: #bbb;
+            }
+            #betButton:hover:not(:disabled),
+            #flipButton:hover:not(:disabled),
+            #loanButton:hover:not(:disabled){
+                background:#aaa;
+            }
+            #result {
+                min-height: 56px;
+                margin-top: 22px;
+                padding:14px;
+                border-left:3px solid var(--green);
+                border-radius:4px;
+                overflow-wrap:anywhere;
+                color:var(--text);
+            }
+            dialog {
+                width:min(400px,calc(100% - 32px));
+                padding:24px;
+                background:var(--panel);
+                color:var(--text);
+                border:1px solid var(--border);
+                border-radius:14px;
+                box-shadow:0 20px 80px #0009;
+            }
+            dialog::backdrop {
+                background:#000b;
+                backdrop-filter:blur(5px);
+            }
+            dialog p{
+                color:var(--text);
+                font-size:1.2rem;
+            }
+            dialog .button-group{
+                display:flex;
+                gap:10px;
+            }
+            dialog .button-group button{flex:1;}
+            @media(max-width:480px){
+                main{
+                    margin:20px auto;
+                    padding:20px;
+                }
+                h1{font-size:1.9rem;}
+                button{padding:10px 12px;}
+            }
+        </style>
+        <iframe src="../pages/header.html" style="width:100%;height:30px;overflow:hidden;border:none"></iframe>
+    </head>
+    <body>
+        <main>
+            <h1>Gambling</h1>
+            <p>Welcome to the Gambling page! This is very legal.</p>
+            <dialog id="customPrompt">
+                <form method="dialog">
+                    <p>r u a cop</p>
+                    <div class="button-group">
+                        <button value="y">Yes</button>
+                        <button value="n">naur</button>
+                    </div>
+                </form>
+            </dialog>
+            <script>
+                const dialog=document.getElementById('customPrompt');
+                dialog.showModal();
+                dialog.addEventListener('close',()=>{
+                    if (dialog.returnValue!=="n") {
+                        window.location.href="https://www.fbi.gov/";
+                    }
+                });
+            </script>
+            <p id="balance">Balance: $0.00</p>
+            <p id="debt">Debt: $0.00</p>
+            <input type="number" id="betAmount" placeholder="How much do you want to bet?">
+            <button id="betButton">Place Bet</button>
+            <button id="flipButton">Flip Coin</button>
+            <input type="number" id="loanAmount" placeholder="How much do you want to loan/repay?">
+            <button id="loanButton">Loan/Repay</button>
+            <p id="result"></p>
+            <script>
+                let debt=0;
+                let balance=0;
+                let betPlaced=false;
+                let betAmount=0;
+                const balanceElement=document.getElementById('balance');
+                const betAmountInput=document.getElementById('betAmount');
+                const betButton=document.getElementById('betButton');
+                const flipButton=document.getElementById('flipButton');
+                const loanAmountInput=document.getElementById('loanAmount');
+                const loanButton=document.getElementById('loanButton');
+                const resultElement=document.getElementById('result');
+                betButton.addEventListener('click',()=>{
+                    if(betPlaced){
+                        resultElement.textContent="You already have a bet placed. Flip the coin first.";
+                        return;
+                    }
+                    const amount=Number(betAmountInput.value);
+                    if (betAmountInput.value.trim()===""||!Number.isFinite(amount)||amount===0){
+                        resultElement.textContent="Please enter a valid, nonzero bet amount.";
+                        return;
+                    }
+                    if(Math.abs(amount)>Math.abs(balance)){
+                        resultElement.textContent="You don't have enough money to place that bet.";
+                        return;
+                    }
+                    betAmount=amount;
+                    balance-=betAmount;
+                    betPlaced=true;
+                    balanceElement.textContent=`Balance: $${balance.toFixed(2)}`;
+                    resultElement.textContent=`You bet $${betAmount.toFixed(2)}.`;
+                    betButton.disabled=true;
+                    betAmountInput.disabled=true;
+                });
+                flipButton.addEventListener('click',()=>{
+                    if(!betPlaced){
+                        resultElement.textContent="Please place a valid bet first.";
+                        return;
+                    }
+                    const outcome=Math.random()<0.5?"heads":"tails";
+                    let won;
+                    if (outcome==="heads") {
+                        balance+=betAmount*2;
+                        won=betAmount>0;
+                    }
+                    else{won=betAmount<0;}
+                    balanceElement.textContent=`Balance: $${balance.toFixed(2)}`;
+                    resultElement.textContent=`${won?"You won!":"You lost."} The coin landed on ${outcome}. You now have $${balance.toFixed(2)}.`;
+                    betAmountInput.value="";
+                    betPlaced=false;
+                    betAmount=0;
+                    betButton.disabled=false;
+                    betAmountInput.disabled=false;
+                });
+                loanButton.addEventListener('click',()=>{
+                    const amount=Number(loanAmountInput.value);
+                    if (loanAmountInput.value.trim()===""||!Number.isFinite(amount)||amount===0){
+                        resultElement.textContent="Please enter a valid, nonzero loan/repay amount.";
+                        return;
+                    }
+                    balance+=amount;
+                    debt+=amount
+                    document.getElementById('debt').textContent=`Debt: $${debt.toFixed(2)}`;
+                    balanceElement.textContent=`Balance: $${balance.toFixed(2)}`;
+                    resultElement.textContent=`You ${amount>0?"loaned":"repaid"} $${Math.abs(amount).toFixed(2)}. You now have $${balance.toFixed(2)}.`;
+                    loanAmountInput.value="";
+                });
+            </script>
+        </main>
+    </body>
+</html>

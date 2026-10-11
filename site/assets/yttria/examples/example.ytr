@@ -1,0 +1,14 @@
+fun sint32 factorial(let const sint32 n){
+    let mut sint32 result=1;
+    for(let const sint32 iterator) in(range(2,get(n)+1)){
+        set result=get(result)*get(iterator);
+    };
+    return(get(result));
+};
+fun uint8 main(){
+    let const sint32 number=5;
+    let const sint32 result=factorial(number);
+    io.console.output("Factorial: ");
+    io.console.output(get(result));
+    return(0);
+};

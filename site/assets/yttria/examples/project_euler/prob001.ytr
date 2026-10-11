@@ -1,13 +1,14 @@
-import math,logic,io
+import math,logic,io;
 fun uint8 main(){
     let mut sint32 sum=0;
     let mut sint32 number=1;
     while(get(number)<1000){
         if(logic.or(math.mod(number,3)==0,math.mod(number,5)==0)){
             set sum=get(sum)+get(number);
-        }
+        };
         set number=get(number)+1;
-    }
+    };
     io.console.output(get(sum));
     io.console.flush('\n');
-}
+    return(0);
+};

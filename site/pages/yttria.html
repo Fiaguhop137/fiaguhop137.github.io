@@ -329,7 +329,7 @@
                 <pre><code>io.console.output("Hello, world!");</code></pre>
                 <p><code>io.console.output</code> appends its argument to the output buffer without automatically appending a newline. </p>
                 <h3>Flushing console output</h3>
-                <p><code>io.console.output</code> appends text to the output buffer. Use <code>io.console.flush</code> with one <code>char</code> argument to write the buffered output to the console, clear the buffer, and then write that character.</p>
+                <p><code>io.console.output</code> appends text to the output buffer. Use <code>io.console.flush()</code> to write the buffered output to the console and clear the buffer. An optional <code>char</code> argument is written afterward.</p>
                 <pre><code>io.console.output("Hello, ");
 io.console.output("world!");
 io.console.flush("\n");</code></pre>

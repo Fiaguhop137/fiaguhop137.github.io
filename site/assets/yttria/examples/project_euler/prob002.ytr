@@ -1,0 +1,17 @@
+import math,io;
+fun uint8 main(){
+    let mut sint32 sum=0;
+    let mut sint32 previous=1;
+    let mut sint32 current=2;
+    while(get(current)<=4000000){
+        if(math.mod(get(current),2)==0){
+            set sum=get(sum)+get(current);
+        };
+        let mut sint32 next=get(previous)+get(current);
+        set previous=get(current);
+        set current=get(next);
+    };
+    io.console.output(get(sum));
+    io.console.flush('\n');
+    return(0);
+};

@@ -1,0 +1,31 @@
+math{
+    fun sint32 mod(let const sint32 a,let const sint32 b){
+        let mut sint32 dividend=get(a);
+        let mut sint32 divisor=get(b);
+        let mut boolean negative=false;
+        if(get(divisor)==0){
+            write(stderr,"Modulo by zero",14);
+            return(0);
+        };
+        if(math.less_than(get(dividend),0)){
+            set dividend=0-get(dividend);
+            set negative=true;
+        };
+        if(math.less_than(get(divisor),0)){
+            set divisor=0-get(divisor);
+        };
+        if(get(dividend)==get(divisor)){
+            set dividend=math.subtract(get(dividend),get(divisor));
+        }
+        while(math.greater_than(get(dividend),get(divisor))){
+            set dividend=math.subtract(get(dividend),get(divisor));
+        };
+        if(get(negative)){
+            return(0-get(dividend));
+        };
+        return(get(dividend));
+    };
+    fun sint32 square(let const sint32 a){
+        return(math.multiply(get(a),get(a)));
+    };
+};
