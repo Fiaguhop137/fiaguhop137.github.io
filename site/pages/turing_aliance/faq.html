@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Frequently Asked Questions</title>
+    <style>
+        .faq-title{
+            text-align:center;
+            margin-bottom:24px;
+            color:#321000;
+        }
+        details{
+            background-color:#fedcba;
+            border-radius:9px;
+            margin-bottom:12px;
+            padding:16px;
+        }
+        details:hover{background-color:#edcba9;}
+        summary{
+            font-weight:600;
+            font-size:1.1rem;
+            cursor:pointer;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            color:#654321;
+        }
+        summary::after{
+            content:'+';
+            font-size:1.4rem;
+            font-weight:400;
+            transition:transform 0.5s ease;
+        }
+        details[open] summary::after{transform: rotate(45deg);}
+        .faq-answer {
+            margin-top:12px;
+            line-height:1.6;
+            color:#987654;
+        }
+        .faq-answer p{margin:0;}
+    </style>
+</head>
+<body>
+    <div class="faq-container">
+        <h2 class="faq-title">Frequently Asked Questions</h2>
+        <div id="qna"></div>
+        <script>
+            const qna=document.getElementById("qna");
+            const qta={
+                "How do I get my IAs/SIAs to intervene with my work less/more? I don't really need/need much help with the work.":
+                    "Yell at them and if they dont fix it for you, hit them with a hammer",
+                "Which students qualify for special needs services and which types?":
+                    "All of them",
+                "How do I get rid of or add IEP and resource blocks?":
+                    "Murder",
+                "What's the difference between IEP and 504 plans?":
+                    "504 is more fun",
+                "How do I get rid of or add 504 and resource blocks?":
+                    "More murder",
+                "What do I do if a teacher refuses to give me the accommodations listed on my IEP/504 plan?":
+                    "Something I have been imformed by my lawyer I'm not allowed to say",
+                "Can my school change or remove my IEP/504 accommodations without telling me or my parents?":
+                    "No, and if they do, please commit the atrocities listed in the previous answer",
+                "Are accommodations a privilege or a necessity?":
+                    "A privilege, you spoiled brat",
+                "Who do I talk to if a parent requests an evaluation for special education services?":
+                    "ur mom"
+            }
+            for(const [question,answer] of Object.entries(qta)){
+                const newDetail=document.createElement("details");
+                const newSummary=document.createElement("summary");
+                newSummary.textContent=question;
+                const newDivAnswer=document.createElement("div");
+                newDivAnswer.classList.add("faq-answer");
+                const newPara=document.createElement("p");
+                newPara.textContent=answer;
+                newDetail.append(newSummary);
+                newDetail.append(newDivAnswer);
+                newDivAnswer.append(newPara);
+                qna.append(newDetail);
+            }
+        </script>
+    </div>
+</body>
+</html>
