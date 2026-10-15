@@ -60,7 +60,6 @@
             ]
           })
         });
-
         if (!response.ok) {
           const errorText = await response.text();
           throw new Error(`Server Error (${response.status}): ${errorText}`);
