@@ -3,82 +3,96 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chromebook AI Fix</title>
+  <title>Chromebook AI Sandbox</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background: #fafafa; color: #333; }
-    h1 { color: #1a73e8; }
-    #output { background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #dadce0; white-space: pre-wrap; word-wrap: break-word; min-height: 50px; }
-    button { background: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; max-width: 700px; margin: 0 auto; background: #f0f2f5; color: #333; }
+    h1 { color: #1a73e8; text-align: center; }
+    .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e0e0e0; }
+    textarea { width: 100%; height: 80px; padding: 12px; border-radius: 8px; border: 1px solid #ccc; resize: vertical; box-sizing: border-box; font-size: 15px; margin-bottom: 10px; }
+    textarea:focus { border-color: #1a73e8; outline: none; }
+    #status { font-weight: bold; color: #5f6368; margin: 5px 0; }
+    #output { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dadce0; white-space: pre-wrap; word-wrap: break-word; min-height: 100px; font-size: 15px; line-height: 1.5; }
+    button { background: #1a73e8; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; width: 100%; transition: background 0.2s; }
     button:hover { background: #1557b0; }
     button:disabled { background: #ccc; cursor: not-allowed; }
   </style>
 </head>
 <body>
-  <h1>Chromebook Local File AI</h1>
-  <p id="status">Ready.</p>
+
+  <h1>Chromebook AI Sandbox</h1>
   
-  <button id="generateBtn">Tell me a joke</button>
-  <p><strong>Response:</strong></p>
-  <pre id="output">Click the button to generate a response...</pre>
+  <div class="card">
+    <p id="status">Status: Ready</p>
+    <textarea id="userInput" placeholder="Type your prompt here..."></textarea>
+    <button id="generateBtn">Ask AI</button>
+    <p><strong>AI Response:</strong></p>
+    <div id="output">Your AI response will show up here...</div>
+  </div>
 
   <script type="module">
-    // Replace this with your actual OpenRouter key
-    const OPENROUTER_API_KEY = "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";
+    // Paste your Google AI Studio API key here
+    const GEMINI_API_KEY = "AQ.Ab8RN6KKVVPFOb-u4-iJFhwVoa-GlLWX8-kzP6oDoFgLEbP_sw";
 
     const status = document.getElementById("status");
     const output = document.getElementById("output");
     const btn = document.getElementById("generateBtn");
+    const userInput = document.getElementById("userInput");
 
     async function generateText() {
-      if (OPENROUTER_API_KEY === "PASTE_YOUR_OPENROUTER_KEY_HERE" || OPENROUTER_API_KEY.trim() === "") {
-        status.textContent = "Error: Key missing.";
-        output.textContent = "Please edit this file and paste your OpenRouter API key inside the script tag code!";
+      const prompt = userInput.value.trim();
+      
+      if (!prompt) {
+        status.textContent = "Status: Error";
+        output.textContent = "Please type something into the text box first!";
+        return;
+      }
+
+      if (GEMINI_API_KEY === "PASTE_YOUR_GEMINI_API_KEY_HERE" || GEMINI_API_KEY.trim() === "") {
+        status.textContent = "Status: Error";
+        output.textContent = "Please edit the file and paste your Gemini API key inside the script tag!";
         return;
       }
 
       try {
-        status.textContent = "Connecting to AI...";
+        status.textContent = "Status: Connecting via proxy gateway...";
         output.textContent = "";
         btn.disabled = true;
 
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        const url = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+
+        const response = await fetch(url, {
           method: "POST",
           headers: {
-            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
             "Content-Type": "application/json",
-            // Fixed: Changed referer away from localhost to clear school proxies
-            "HTTP-Referer": "https://openrouter.ai", 
-            "X-Title": "ChromebookSchoolProject"
+            "Authorization": `Bearer ${GEMINI_API_KEY}`
           },
           body: JSON.stringify({
-            model: "openrouter/free",
+            model: "gemini-3.1-flash-lite", // Using the active standard engine version
             messages: [
-              {
-                role: "user",
-                content: "Tell me a short, clean programming joke."
-              }
+              { role: "user", content: prompt }
             ]
           })
         });
+
         if (!response.ok) {
           const errorText = await response.text();
-          throw new Error(`Server Error (${response.status}): ${errorText}`);
+          throw new Error(`Server Sync Error (${response.status}): ${errorText}`);
         }
 
         const data = await response.json();
         
-        // Fixed: The array path was missing the target index [0]
+        // Fixed: Added the proper array parsing index markers [0]
         if (data.choices && data.choices[0] && data.choices[0].message) {
           output.textContent = data.choices[0].message.content;
-          status.textContent = "Finished successfully!";
+          status.textContent = "Status: Completed!";
         } else {
-          throw new Error("Unexpected response structure from AI provider.");
+          throw new Error("Response structural parsing conflict.");
         }
 
       } catch (error) {
         console.error(error);
-        status.textContent = "Connection failed.";
-        output.textContent = error.message + "\n\nTip: If it still says 'NetworkError', your school Wi-Fi is actively blocking openrouter.ai endpoints.";
+        status.textContent = "Status: Failed";
+        output.textContent = error.message;
       } finally {
         btn.disabled = false;
       }
