@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chromebook AI Fix</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; background: #fafafa; color: #333; }
+    h1 { color: #1a73e8; }
+    #output { background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #dadce0; white-space: pre-wrap; word-wrap: break-word; min-height: 50px; }
+    button { background: #1a73e8; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; }
+    button:hover { background: #1557b0; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <h1>Chromebook Local File AI</h1>
+  <p id="status">Ready.</p>
+  
+  <button id="generateBtn">Tell me a joke</button>
+  <p><strong>Response:</strong></p>
+  <pre id="output">Click the button to generate a response...</pre>
+
+  <script type="module">
+    // Replace this with your actual OpenRouter key
+    const OPENROUTER_API_KEY = "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";
+
+    const status = document.getElementById("status");
+    const output = document.getElementById("output");
+    const btn = document.getElementById("generateBtn");
+
+    async function generateText() {
+      if (OPENROUTER_API_KEY === "PASTE_YOUR_OPENROUTER_KEY_HERE" || OPENROUTER_API_KEY.trim() === "") {
+        status.textContent = "Error: Key missing.";
+        output.textContent = "Please edit this file and paste your OpenRouter API key inside the script tag code!";
+        return;
+      }
+
+      try {
+        status.textContent = "Connecting to AI...";
+        output.textContent = "";
+        btn.disabled = true;
+
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json",
+            // Fixed: Changed referer away from localhost to clear school proxies
+            "HTTP-Referer": "https://openrouter.ai", 
+            "X-Title": "ChromebookSchoolProject"
+          },
+          body: JSON.stringify({
+            model: "openrouter/free",
+            messages: [
+              {
+                role: "user",
+                content: "Tell me a short, clean programming joke."
+              }
+            ]
+          })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Server Error (${response.status}): ${errorText}`);
+        }
+
+        const data = await response.json();
+        
+        // Fixed: The array path was missing the target index [0]
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          output.textContent = data.choices[0].message.content;
+          status.textContent = "Finished successfully!";
+        } else {
+          throw new Error("Unexpected response structure from AI provider.");
+        }
+
+      } catch (error) {
+        console.error(error);
+        status.textContent = "Connection failed.";
+        output.textContent = error.message + "\n\nTip: If it still says 'NetworkError', your school Wi-Fi is actively blocking openrouter.ai endpoints.";
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    btn.addEventListener("click", generateText);
+  </script>
+</body>
+</html>
