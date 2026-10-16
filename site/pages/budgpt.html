@@ -12,162 +12,84 @@
         <button id="send">Send</button>
         <p><strong>Response:</strong></p>
         <pre id="output">Click the button to generate a response...</pre>
-
         <script type="module">
-            const DB_BASE_URL = "https://discord-fia-default-rtdb.firebaseio.com";
-            const NODE_PATH = "/budgpt";
-
-            async function postMessage(content) {
-                const messageData = {
-                    from: "client",
-                    content: content
-                };
-
-                const url = `${DB_BASE_URL}${NODE_PATH}.json`;
-
-                try {
-                    const response = await fetch(url, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify(messageData)
-                    });
-
-                    if (response.ok) {
-                        const resData = await response.json();
-                        console.log("Message posted:", resData.name);
+            const DB_BASE_URL="https://discord-fia-default-rtdb.firebaseio.com";
+            const NODE_PATH="/budgpt";
+            async function postMessage(content){
+                const messageData={from:"client",content:content};
+                const url=`${DB_BASE_URL}${NODE_PATH}.json`;
+                try{
+                    const response=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(messageData)});
+                    if(response.ok){
+                        const resData=await response.json();
+                        console.log("Message posted:",resData.name);
                         return resData.name;
                     }
-
-                    console.error("Failed to post:", response.status);
+                    console.error("Failed to post:",response.status);
                     return null;
-                } catch (error) {
-                    console.error("Post error:", error);
+                }catch(error){
+                    console.error("Post error:",error);
                     return null;
                 }
             }
-
-            function handleIncomingMessage(message, source, msgId) {
-                console.log("Incoming message:", {
-                    message,
-                    source,
-                    msgId
-                });
-
-                if (message && source === "server") {
-                    console.log("SERVER REPLY RECEIVED:", msgId, message);
-
-                    document.getElementById("output").textContent = message;
-                    document.getElementById("status").textContent =
-                        "Response received.";
-
-                    fetch(`${DB_BASE_URL}${NODE_PATH}/${msgId}.json`, {
-                        method: "DELETE"
-                    }).then(response => {
-                        console.log(
-                            "Response cleanup:",
-                            msgId,
-                            response.status
-                        );
-                    }).catch(error => {
-                        console.error("Delete error:", error);
-                    });
+            function handleIncomingMessage(message,source,msgId){
+                console.log("Incoming message:",{message,source,msgId});
+                if (message&&source==="server"){
+                    console.log("SERVER REPLY RECEIVED:",msgId,message);
+                    document.getElementById("output").textContent=message;
+                    document.getElementById("status").textContent="Response received.";
+                    fetch(`${DB_BASE_URL}${NODE_PATH}/${msgId}.json`,{method:"DELETE"}).then(response=>{console.log("Response cleanup:",msgId,response.status);}).catch(error=>{console.error("Delete error:",error);});
                 }
             }
-
-            function startRealtimeStream() {
-                const streamUrl = `${DB_BASE_URL}${NODE_PATH}.json`;
-
-                console.log("Connecting to Firebase:", streamUrl);
-
-                const client = new EventSource(streamUrl);
-
-                client.onopen = () => {
+            function startRealtimeStream(){
+                const streamUrl=`${DB_BASE_URL}${NODE_PATH}.json`;
+                console.log("Connecting to Firebase:",streamUrl);
+                const client=new EventSource(streamUrl);
+                client.onopen=()=>{
                     console.log("Firebase stream connected");
-                    document.getElementById("status").textContent = "Ready.";
+                    document.getElementById("status").textContent="Ready.";
                 };
-
-                client.onmessage = (event) => {
-                    console.log("Default SSE event:", event.data);
-                };
-
-                client.addEventListener("put", event => {
-                    console.log("PUT EVENT ARRIVED:", event.data);
-
+                client.onmessage=(event)=>{console.log("Default SSE event:",event.data);};
+                client.addEventListener("put",event=>{
+                    console.log("PUT EVENT ARRIVED:",event.data);
                     let eventData;
-
-                    try {
-                        eventData = JSON.parse(event.data);
-                    } catch (error) {
-                        console.error("Invalid Firebase event:", error);
+                    try{eventData=JSON.parse(event.data);}
+                    catch(error){
+                        console.error("Invalid Firebase event:",error);
                         return;
                     }
-
-                    if (!eventData) return;
-
-                    const path = eventData.path ?? "";
-                    const data = eventData.data;
-
-                    console.log("Firebase event path:", path);
-
-                    if (path === "/" && data && typeof data === "object") {
-                        for (const [key, val] of Object.entries(data)) {
-                            if (!val || typeof val !== "object") continue;
-
-                            handleIncomingMessage(
-                                val.content || "",
-                                val.from || "",
-                                key
-                            );
+                    if(!eventData)return;
+                    const path=eventData.path??"";
+                    const data=eventData.data;
+                    console.log("Firebase event path:",path);
+                    if (path==="/"&&data&&typeof data==="object"){
+                        for (const[key,val] of Object.entries(data)){
+                            if (!val||typeof val!=="object")continue;
+                            handleIncomingMessage(val.content||"",val.from||"",key);
                         }
-                    } else if (
-                        path !== "/" &&
-                        data &&
-                        typeof data === "object"
-                    ) {
-                        const msgId = path.replace(/^\//, "");
-
-                        handleIncomingMessage(
-                            data.content || "",
-                            data.from || "",
-                            msgId
-                        );
+                    }else if(path!=="/"&&data&&typeof data==="object"){
+                        const msgId=path.replace(/^\//,"");
+                        handleIncomingMessage(data.content||"",data.from||"",msgId);
                     }
                 });
-
-                client.addEventListener("patch", event => {
-                    console.log("PATCH EVENT ARRIVED:", event.data);
-                });
-
-                client.onerror = event => {
-                    console.error("Firebase stream error:", event);
-                    document.getElementById("status").textContent =
-                        "Firebase connection interrupted; reconnecting...";
+                client.addEventListener("patch",event=>{console.log("PATCH EVENT ARRIVED:", event.data);});
+                client.onerror=event=>{
+                    console.error("Firebase stream error:",event);
+                    document.getElementById("status").textContent="Firebase connection interrupted; reconnecting...";
                 };
             }
-
-            document.getElementById("send").addEventListener("click", async () => {
-                const inputElement = document.getElementById("input");
-                const input = inputElement.value;
-
-                if (!input.trim()) return;
-
-                document.getElementById("status").textContent =
-                    "Sending message...";
-
-                const msgId = await postMessage(input);
-
-                if (msgId) {
-                    document.getElementById("status").textContent =
-                        `Message sent with ID: ${msgId}`;
-                    inputElement.value = "";
-                } else {
-                    document.getElementById("status").textContent =
-                        "Failed to send message.";
+            document.getElementById("send").addEventListener("click",async()=>{
+                const inputElement=document.getElementById("input");
+                const input=inputElement.value;
+                if(!input.trim())return;
+                document.getElementById("status").textContent="Sending message...";
+                const msgId=await postMessage(input);
+                if(msgId){
+                    document.getElementById("status").textContent=`Message sent with ID: ${msgId}`;
+                    inputElement.value="";
                 }
+                else{document.getElementById("status").textContent="Failed to send message.";}
             });
-
             startRealtimeStream();
         </script>
     </body>
