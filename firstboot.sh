@@ -32,7 +32,7 @@ UUID_ARC="arcmenu@arcmenu.com"
 VERSION_ARC=$(curl -s "https://extensions.gnome.org/extension-info/?pk=3628" | jq -r '.shell_version_map | to_entries | max_by(.value.version) | .value.version')
 curl -fL "https://extensions.gnome.org/extension-data/${UUID_ARC}.v${VERSION_ARC}.shell-extension.zip" -o /tmp/arcmenu.zip
 UUID_DASH="dash-to-panel@jderose9.github.com"
-VERSION_DASH=$(curl -s "https://gnome.org" | jq -r '.shell_version_map | to_entries | max_by(.value.version) | .value.version')
+VERSION_DASH=$(curl -s "https://extensions.gnome.org/extension-info/?pk=1160" | jq -r '.shell_version_map | to_entries | max_by(.value.version) | .value.version')
 curl -fL "https://extensions.gnome.org/extension-data/${UUID_DASH}.v${VERSION_DASH}.shell-extension.zip" -o /tmp/dash-to-panel.zip
 gnome-extensions install --force /tmp/arcmenu.zip
 gnome-extensions install --force /tmp/dash-to-panel.zip
