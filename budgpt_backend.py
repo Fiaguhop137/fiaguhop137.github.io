@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import json,queue,threading,time,ollama,requests
 from datetime import datetime
 DB_BASE_URL="https://discord-fia-default-rtdb.firebaseio.com"
