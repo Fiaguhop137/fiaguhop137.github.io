@@ -1,9 +1,7 @@
 #!/bin/bash
 set -e
-sudo dnf update -y
-sudo dnf install dnf5 -y
-sudo dnf5 update -y
-sudo dnf5 install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm git gcc gcc-c++ make cmake python3 python3-pip curl wget htop fastfetch pv firefox tar 7z yt-dlp nodejs npm gnome-menus jq mpv ccache clang++ alacritty flite
+sudo dnf update -y; sudo dnf install dnf5 -y; sudo dnf5 upgrade -y
+sudo dnf5 install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm git gcc gcc-c++ make cmake python3 python3-pip curl wget htop fastfetch pv firefox tar 7z yt-dlp nodejs npm gnome-menus jq mpv ccache clang++ alacritty flite sl
 mkdir -p /home/firebot/.config/alacritty
 cp /home/firebot/Downloads/alacritty.toml /home/firebot/.config/alacritty/alacritty.toml
 echo please log in and set up firefox
