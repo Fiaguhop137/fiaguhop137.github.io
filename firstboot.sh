@@ -18,6 +18,7 @@ proton-drive auth login
 read -p "press enter to continue"
 proton-drive filesystem download -f replace -d replace /my-files/Backups /home/firebot/Downloads/
 tar -xJf /home/firebot/Downloads/Backups/Downloads.tar.xz -C /home/firebot/
+curl -fsSL https://ollama.com/install.sh | sh
 flatpak install flathub org.prismlauncher.PrismLauncher -y
 flatpak run org.prismlauncher.PrismLauncher
 tar -xJf /home/firebot/Downloads/Backups/Minecraft.tar.xz -C /tmp
