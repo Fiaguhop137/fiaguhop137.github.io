@@ -1,8 +1,0 @@
-[2026-10-17T14:17:32.215-04:00] Connecting to Firebase: https://discord-fia-default-rtdb.firebaseio.com/budgpt.json
-[2026-10-17T14:17:32.454-04:00] Firebase connected: HTTP 200
-[2026-10-17T14:17:32.454-04:00] Content-Type: 'text/event-stream; charset=utf-8'
-[2026-10-17T14:17:32.455-04:00] SSE EVENT RECEIVED: put; data={"path":"/","data":null}
-[2026-10-17T14:17:32.455-04:00] Firebase update: path='/', data_type=NoneType
-[2026-10-17T14:17:32.455-04:00] Unhandled Firebase update: {'path': '/', 'data': None}
-[2026-10-17T14:18:02.454-04:00] SSE EVENT RECEIVED: keep-alive; data=null
-[2026-10-17T14:18:32.464-04:00] SSE EVENT RECEIVED: keep-alive; data=null
