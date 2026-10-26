@@ -1,0 +1,27 @@
+# This file handles live deployments on a direct git push to main
+name: Deploy to Firebase Hosting on Push
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  checks: write
+  contents: read
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      # Optional: Uncomment the line below if your project requires a build step (like React, Vue, Next.js, etc.)
+      # - run: npm ci && npm run build
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FIAGUHOP137 }}
+          projectId: fiaguhop137
+          channelId: live
