@@ -29,7 +29,7 @@ rm -rf /home/firebot/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher
 mv /tmp/Minecraft/instances /home/firebot/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/instances
 rm -rf /home/firebot/Downloads/Backups
 git config --global alias.sync '!/home/firebot/Downloads/shell/git-sync.sh'
-python3 -m pip install --break-system-packages discord.py cairosvg python-dotenv cryptography tapo pygame-ce
+python3 -m pip install --break-system-packages discord.py cairosvg python-dotenv cryptography tapo pygame-ce cairosvg
 git config --global user.name "Fiaguhop137"
 git config --global user.email "eastonzou@gmail.com"
 UUID_ARC="arcmenu@arcmenu.com"
