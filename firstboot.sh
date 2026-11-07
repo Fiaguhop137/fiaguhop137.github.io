@@ -10,6 +10,8 @@ cp /home/firebot/Downloads/alacritty.toml /home/firebot/.config/alacritty/alacri
 echo please log in and set up firefox
 firefox
 read -p "press enter to continue"
+clang++ /home/firebot/git/random_bs/log_change.cpp -o /home/firebot/git/random_bs/log_change -O2
+sudo install -D /home/firebot/git/random_bs/log_change /usr/bin/log_change
 curl -fL -o /tmp/proton-drive https://proton.me/download/drive/cli/0.5.0/linux-x64/proton-drive
 chmod 755 /tmp/proton-drive
 sudo install -m 755 /tmp/proton-drive /usr/local/bin/proton-drive
