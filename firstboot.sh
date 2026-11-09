@@ -4,7 +4,7 @@ sudo dnf update -y; sudo dnf install dnf5 -y; sudo dnf5 upgrade -y
 sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
 echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\nautorefresh=1\ntype=rpm-md\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null
 sudo dnf5 check-update
-sudo dnf5 install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm git gcc gcc-c++ make cmake python3 python3-pip curl wget htop fastfetch pv firefox tar 7z yt-dlp nodejs npm gnome-menus jq mpv ccache clang++ alacritty flite sl code python3-tkinter google-noto-color-emoji-fonts godot --allowerasing
+sudo dnf5 install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm git gcc gcc-c++ make cmake python3 python3-pip curl wget htop fastfetch pv firefox tar 7z yt-dlp nodejs npm gnome-menus jq mpv ccache clang++ alacritty flite sl code python3-tkinter google-noto-color-emoji-fonts dotnet-sdk-10.0 --allowerasing
 mkdir -p /home/firebot/.config/alacritty
 cp /home/firebot/Downloads/alacritty.toml /home/firebot/.config/alacritty/alacritty.toml
 echo please log in and set up firefox
