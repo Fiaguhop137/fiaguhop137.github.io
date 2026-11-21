@@ -13,7 +13,7 @@ read -p "press enter to continue"
 cd ~
 mkdir git
 cd git
-echo set up git ssh if needed
+echo testing git and also downloading log_change util
 git clone git@github.com:fiaguhop137/log_change.git
 clang++ /home/firebot/git/log_change/log_change.cpp -o /home/firebot/git/log_change/log_change -O2
 sudo install -D /home/firebot/git/log_change/log_change /usr/bin/log_change
