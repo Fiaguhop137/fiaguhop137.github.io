@@ -5,7 +5,7 @@ sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
 echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\nautorefresh=1\ntype=rpm-md\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null
 sudo dnf check-update || :
 sudo dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm --allowerasing
-sudo dnf install -y git gcc gcc-c++ make cmake python3 python3-pip curl wget htop fastfetch pv firefox tar 7zip yt-dlp nodejs npm gnome-menus jq mpv ccache clang alacritty flite sl code python3-tkinter google-noto-color-emoji-fonts dotnet-sdk-10.0 fortune-mod cowsay aalib cmatrix nyancat ydotool librsvg2 librsvg2-tools thunderbird libheif-freeworld ImageMagick-heic --allowerasing
+sudo dnf install -y git gcc gcc-c++ make cmake python3 python3-pip curl wget htop fastfetch pv firefox tar 7zip yt-dlp nodejs npm gnome-menus jq mpv ccache clang alacritty flite sl code python3-tkinter google-noto-color-emoji-fonts dotnet-sdk-10.0 fortune-mod cowsay aalib cmatrix nyancat ydotool librsvg2 librsvg2-tools thunderbird libheif-freeworld ImageMagick-heic python3.15-devel --allowerasing
 mkdir -p /home/firebot/.config/alacritty
 cp /home/firebot/Downloads/alacritty.toml /home/firebot/.config/alacritty/alacritty.toml
 echo please log in and set up firefox
@@ -35,7 +35,7 @@ rm -rf /home/firebot/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher
 mv /tmp/Minecraft/instances /home/firebot/.var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher/instances
 rm -rf /home/firebot/Downloads/Backups
 git config --global alias.sync '!/home/firebot/Downloads/shell/git-sync.sh'
-python3 -m pip install --break-system-packages discord.py cairosvg python-dotenv cryptography tapo pygame-ce cairosvg firebase_admin
+python3 -m pip install --break-system-packages discord.py cairosvg python-dotenv cryptography tapo pygame-ce cairosvg firebase_admin tree-sitter tree-sitter-javascript
 git config --global user.name "Fiaguhop137"
 git config --global user.email "eastonzou@gmail.com"
 UUID_ARC="arcmenu@arcmenu.com"
